@@ -256,8 +256,8 @@
 
             try {
                 // Hardcoded Client-Side Login for GitHub Pages
-                // This replaces the localhost server login since we are serverless
-                if (usr === 'admin' && pwd === 'admin@123') {
+                // Make username lowercase and trim spaces for mobile keyboards
+                if (usr.trim().toLowerCase() === 'admin' && pwd.trim() === 'admin@123') {
                     // Success
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('username', usr);
