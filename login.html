@@ -257,10 +257,16 @@
             try {
                 // Hardcoded Client-Side Login for GitHub Pages
                 // Make username lowercase and trim spaces for mobile keyboards
-                if (usr.trim().toLowerCase() === 'admin' && pwd.trim() === 'admin@123') {
+                const usernameInput = usr.trim().toLowerCase();
+                const passwordInput = pwd.trim();
+
+                // Allow specific passwords for the admin user
+                const validPasswords = ['admin@123', 'dla123', 'diw123'];
+
+                if (usernameInput === 'admin' && validPasswords.includes(passwordInput)) {
                     // Success
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('username', usr);
+                    localStorage.setItem('username', 'admin');
 
                     // Small delay for UX
                     setTimeout(() => {
