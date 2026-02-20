@@ -1,0 +1,8 @@
+variable,description,type,format,validation,source,hasPII,classification,dissemination,size,remarks
+factory_id,เลขทะเบียนโรงงาน 14 หลัก,String,14 digits,Not Null; Unique,ระบบทะเบียน DIW,No,Open,Public,14,รหัสตาม พ.ร.บ. โรงงาน
+factory_name,ชื่อโรงงานอุตสาหกรรม,String,Text,Not Null,ระบบทะเบียน DIW,No,Open,Public,250,
+isic_code,รหัสประเภทการประกอบกิจการ (ISIC),String,5 digits,Not Null; Ref ISIC,ระบบ ISIC,No,Open,Public,5,
+province_code,รหัสจังหวัดที่ตั้งโรงงาน,String,2 digits,Not Null,กรมการปกครอง,No,Open,Public,2,
+investment_baht,มูลค่าเงินลงทุน (บาท),Float,Decimal(15 2),Must >= 0,แบบแจ้งประกอบกิจการ,No,Confidential,Internal,,ห้ามเปิดเผยข้อมูลระดับบุคคล
+hazard_type,ประเภทวัตถุอันตรายที่มีครอบครอง,String,Text,Nullable,ระบบอนุญาต,No,Secret,Internal,,ข้อมูลความมั่นคง
+green_industry_level,ระดับอุตสาหกรรมสีเขียว (GI),Integer,1-5,Value in [1 2 3 4 5],ระบบประเมิน GI,No,Open,Public,1,

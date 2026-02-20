@@ -255,24 +255,17 @@
             err.style.display = 'none';
 
             try {
-                // Determine API URL (Localhost for now)
-                const apiUrl = 'http://localhost:3000/api/login';
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: usr, password: pwd })
-                });
-
-                if (response.ok) {
+                // Hardcoded Client-Side Login for GitHub Pages
+                // This replaces the localhost server login since we are serverless
+                if (usr === 'admin' && pwd === 'admin@123') {
                     // Success
                     localStorage.setItem('isLoggedIn', 'true');
-
-                    // Optional: Store username for greeting
                     localStorage.setItem('username', usr);
 
-                    // Redirect to Main App
-                    window.location.href = 'index.html';
+                    // Small delay for UX
+                    setTimeout(() => {
+                        window.location.href = 'index.html' + window.location.search;
+                    }, 500);
                 } else {
                     throw new Error('Auth Failed');
                 }

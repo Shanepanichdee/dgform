@@ -1,0 +1,8 @@
+variable,description,type,format,validation,source,hasPII,classification,dissemination,size,remarks
+dla_org_id,รหัสองค์กรปกครองส่วนท้องถิ่น (อปท.),String,7 digits,Not Null,ระบบข้อมูล อปท.,No,Open,Public,7,รหัสมาตรฐาน มท.
+revenue_year,ปีงบประมาณ,Integer,YYYY,Not Null,ระบบข้อมูล อปท.,No,Open,Public,4,
+tax_sign,รายได้จากภาษีป้าย,Float,Decimal(12 2),Must >= 0,ระบบข้อมูล อปท.,No,Open,Public,,
+tax_land,รายได้จากภาษีที่ดินและสิ่งปลูกสร้าง,Float,Decimal(12 2),Must >= 0,ระบบข้อมูล อปท.,No,Open,Public,,
+total_revenue,รวมรายได้ที่ อปท. จัดเก็บเอง,Float,Decimal(12 2),Must >= 0,ระบบข้อมูล อปท.,No,Open,Public,,
+population_count,จำนวนประชากรในพื้นที่,Integer,Number,Must >= 0,ทะเบียนราษฎร์,No,Open,Public,,ข้อมูล ณ สิ้นปีงบประมาณ
+mayor_name,ชื่อนายก อปท.,String,Text,Not Null,ระบบข้อมูล อปท.,Yes,Open,Public,150,ผู้บริหารสูงสุดของหน่วยงาน
