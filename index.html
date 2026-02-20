@@ -769,32 +769,54 @@
             }
         }
 
-        // Load Script URL from localStorage or URL Parameters (Token)
+        // Load Script URL from localStorage or URL Parameters (Token/ID)
         function loadConfig() {
+            // --- Predefined Shortcodes (Add more here as needed) ---
+            const shortcodes = {
+                'dla': {
+                    agency: 'กรมการปกครองส่วนท้องถิ่น กระทรวงมหาดไทย',
+                    url: 'https://script.google.com/macros/s/AKfycbwdfCsonERY5XjkPUJypgGCOKW6NNKM5mnDUE0yB8bXv2X05g9anHVNxlYGdO0nV1MnuQ/exec'
+                },
+                'diw': {
+                    agency: 'กรมโรงงานอุตสาหกรรม',
+                    url: '' // Add URL when ready
+                }
+            };
+
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
+            const shortcodeId = urlParams.get('id');
 
-            if (token) {
+            let config = null;
+
+            // 1. Check Shortcode first
+            if (shortcodeId && shortcodes[shortcodeId.toLowerCase()]) {
+                config = shortcodes[shortcodeId.toLowerCase()];
+            }
+            // 2. Fallback to Token if no Shortcode
+            else if (token) {
                 try {
                     // 1. Decode Base64 Token
                     const decodedStr = decodeURIComponent(escape(atob(token)));
-                    const config = JSON.parse(decodedStr);
-
-                    if (config.url) {
-                        localStorage.setItem('scriptUrl', config.url);
-                        document.getElementById('scriptUrl').value = config.url;
-                        // Hide settings panel for token users
-                        document.querySelector('[data-bs-target="#settingsCollapse"]').classList.add('d-none');
-                    }
-                    if (config.agency) {
-                        const agencyInput = document.getElementById('submitterAgency');
-                        agencyInput.value = config.agency;
-                        agencyInput.readOnly = true;
-                        agencyInput.classList.add('bg-light');
-                    }
+                    config = JSON.parse(decodedStr); // Assign to the outer `config` variable
                 } catch (e) {
                     console.error("Invalid token format", e);
                     alert("⚠️ ลิงก์ไม่ถูกต้อง หรือ Token หมดอายุ กรุณาติดต่อผู้ดูแลระบบ");
+                }
+            }
+
+            // Apply the config if found (either from Shortcode or Token)
+            if (config) {
+                if (config.url) {
+                    localStorage.setItem('scriptUrl', config.url);
+                    document.getElementById('scriptUrl').value = config.url;
+                    document.querySelector('[data-bs-target="#settingsCollapse"]').classList.add('d-none');
+                }
+                if (config.agency) {
+                    const agencyInput = document.getElementById('submitterAgency');
+                    agencyInput.value = config.agency;
+                    agencyInput.readOnly = true;
+                    agencyInput.classList.add('bg-light');
                 }
             } else {
                 // 2. Fallback to localStorage if no Token
