@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DataShane.com</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&family=Sarabun:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, #000 150%);
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Branding Logo Animation */
+        .brand-logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            animation: fadeInDown 1.5s ease-out forwards;
+            letter-spacing: -2px;
+        }
+
+        .brand-logo span {
+            font-weight: 300;
+            color: #fff;
+            -webkit-text-fill-color: white;
+        }
+
+        /* Login Form Styles */
+        .login-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 0.5s forwards;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #dfe6e9;
+            font-size: 0.9rem;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Sarabun', sans-serif;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00f2fe;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            color: #0f2027;
+            background: #00f2fe;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-login:hover {
+            background: #fff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-login:disabled {
+            background: #636e72;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-msg {
+            color: #ff7675;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: 'Sarabun', sans-serif;
+            opacity: 0;
+            animation: fadeIn 2s ease-out 2s forwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-5px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="brand-logo">Data<span>Shane</span>.com</div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Username (ชื่อผู้ใช้งาน)</label>
+                <input type="text" class="form-control" id="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password (รหัสผ่าน)</label>
+                <input type="password" class="form-control" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn-login">Login (เข้าสู่ระบบ)</button>
+            <div class="error-msg" id="errorMsg">Incorrect Username or Password</div>
+        </form>
+    </div>
+
+    <div class="footer">
+        Copyright &copy; 2026 Rachen Panichdee. All Rights Reserved.
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const usr = document.getElementById('username').value;
+            const pwd = document.getElementById('password').value;
+            const btn = document.querySelector('.btn-login');
+            const err = document.getElementById('errorMsg');
+
+            // Button State
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span style="font-size:0.9rem">Verifying...</span>';
+            btn.disabled = true;
+            err.style.display = 'none';
+
+            try {
+                // Determine API URL (Localhost for now)
+                const apiUrl = 'http://localhost:3000/api/login';
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usr, password: pwd })
+                });
+
+                if (response.ok) {
+                    // Success
+                    localStorage.setItem('isLoggedIn', 'true');
+
+                    // Optional: Store username for greeting
+                    localStorage.setItem('username', usr);
+
+                    // Redirect to Main App
+                    window.location.href = 'index.html';
+                } else {
+                    throw new Error('Auth Failed');
+                }
+            } catch (error) {
+                console.error(error);
+                // Reset Button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+                // Show Error
+                err.style.display = 'block';
+                err.innerText = 'ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง (Invalid Credentials)';
+            }
+        });
+    </script>
+</body>
+
+</html>

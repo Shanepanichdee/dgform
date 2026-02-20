@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - DataShane.com</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&family=Sarabun:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Overlay (Optional Texture) */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, #000 150%);
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+            padding: 2rem;
+        }
+
+        /* Branding Logo Animation */
+        .brand-logo {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Animation: Fade In + Slide Down + Gentle Float */
+            opacity: 0;
+            animation: fadeInDown 1.5s ease-out forwards, float 4s ease-in-out infinite 1.5s;
+            letter-spacing: -2px;
+        }
+
+        .brand-logo span {
+            font-weight: 300;
+            color: #fff;
+            -webkit-text-fill-color: white;
+        }
+
+        /* Subtitle / Description */
+        .subtitle {
+            font-family: 'Sarabun', sans-serif;
+            /* Thai Friendly */
+            font-size: 1.5rem;
+            color: #b2bec3;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeIn 2s ease-out 0.8s forwards;
+            font-weight: 300;
+        }
+
+        /* Powered By */
+        .powered-by {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #636e72;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeIn 2s ease-out 0.5s forwards;
+        }
+
+        /* Enter Button Animation */
+        .btn-enter {
+            display: inline-block;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            color: #00f2fe;
+            border: 2px solid #00f2fe;
+            border-radius: 50px;
+            text-decoration: none;
+            background: rgba(0, 242, 254, 0.05);
+            transition: all 0.4s ease;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 1.2s forwards;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-enter:hover {
+            background: #00f2fe;
+            color: #0f2027;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.6);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-family: 'Sarabun', sans-serif;
+            opacity: 0;
+            animation: fadeIn 2s ease-out 2s forwards;
+        }
+
+        /* Keyframes */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .brand-logo {
+                font-size: 3rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="powered-by">Created by</div>
+        <div class="brand-logo">Data<span>Shane</span>.com</div>
+        <div class="subtitle">
+            Platform for Data Governance & Metadata Management<br>
+            ระบบจัดทำรายละเอียดข้อมูลและธรรมาภิบาลข้อมูล
+        </div>
+
+        <a href="login.html" class="btn-enter">เข้าสู่ระบบ (Enter)</a>
+    </div>
+
+    <div class="footer">
+        Copyright &copy; 2026 Rachen Panichdee. All Rights Reserved.
+    </div>
+</body>
+
+</html>
