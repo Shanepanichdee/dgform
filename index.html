@@ -278,9 +278,32 @@
                     </div>
                     <small class="text-muted mt-1 d-block">
                         <i class="bi bi-info-circle me-1"></i>
-                        วาง URL ที่ได้รับจากผู้ดูแลระบบ (แต่ละหน่วยงานจะได้รับ URL ที่ต่างกัน)
-                        &mdash; ตั้งค่าครั้งเดียว ระบบจะจำไว้ใน browser
+                        ตั้งค่าเฉพาะกรณีที่ผู้ดูแลระบบแจ้งให้ใส่ URL ด้วยตนเอง
                     </small>
+                </div>
+
+                <!-- Admin Link Generator (Hidden by default, can be toggled via console or a secret button) -->
+                <div class="card card-body bg-dark text-white mt-3 d-none" id="adminGenerator">
+                    <h6><i class="bi bi-key-fill text-warning me-2"></i>เครื่องมือสร้างลิงก์เข้ารหัส (Admin Only)</h6>
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <input type="text" id="genAgency" class="form-control form-control-sm"
+                                placeholder="ชื่อหน่วยงาน เช่น กรมสรรพากร">
+                        </div>
+                        <div class="col-md-7">
+                            <input type="url" id="genUrl" class="form-control form-control-sm"
+                                placeholder="Google Script URL ของหน่วยงานนั้น">
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button class="btn btn-warning btn-sm w-100 fw-bold"
+                                onclick="generateEncodedLink()">สร้างลิงก์สำหรับส่ง</button>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <input type="text" id="genResult"
+                                class="form-control form-control-sm bg-secondary text-white border-secondary" readonly
+                                placeholder="ผลลัพธ์ลิงก์ลับจะแสดงที่นี่...">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -746,35 +769,76 @@
             }
         }
 
-        // Load Script URL from localStorage or URL Parameters
+        // Load Script URL from localStorage or URL Parameters (Token)
         function loadConfig() {
-            // 1. Check URL parameters first (Top priority - overrides everything)
             const urlParams = new URLSearchParams(window.location.search);
-            const paramUrl = urlParams.get('url');
-            const paramAgency = urlParams.get('agency');
+            const token = urlParams.get('token');
 
-            if (paramUrl) {
-                // Auto-configure from Link
-                localStorage.setItem('scriptUrl', paramUrl);
-                document.getElementById('scriptUrl').value = paramUrl;
-                // Optionally hide settings panel button if auto-configured
-                document.querySelector('[data-bs-target="#settingsCollapse"]').classList.add('d-none');
+            if (token) {
+                try {
+                    // 1. Decode Base64 Token
+                    const decodedStr = decodeURIComponent(escape(atob(token)));
+                    const config = JSON.parse(decodedStr);
+
+                    if (config.url) {
+                        localStorage.setItem('scriptUrl', config.url);
+                        document.getElementById('scriptUrl').value = config.url;
+                        // Hide settings panel for token users
+                        document.querySelector('[data-bs-target="#settingsCollapse"]').classList.add('d-none');
+                    }
+                    if (config.agency) {
+                        const agencyInput = document.getElementById('submitterAgency');
+                        agencyInput.value = config.agency;
+                        agencyInput.readOnly = true;
+                        agencyInput.classList.add('bg-light');
+                    }
+                } catch (e) {
+                    console.error("Invalid token format", e);
+                    alert("⚠️ ลิงก์ไม่ถูกต้อง หรือ Token หมดอายุ กรุณาติดต่อผู้ดูแลระบบ");
+                }
             } else {
-                // 2. Fallback to localStorage if no URL param
+                // 2. Fallback to localStorage if no Token
                 const saved = localStorage.getItem('scriptUrl');
                 if (saved) {
                     document.getElementById('scriptUrl').value = saved;
                 }
             }
-
-            if (paramAgency) {
-                // Auto-fill agency and lock it
-                const agencyInput = document.getElementById('submitterAgency');
-                agencyInput.value = paramAgency;
-                agencyInput.readOnly = true; // Lock the field
-                agencyInput.classList.add('bg-light');
-            }
         }
+
+        // --- Admin Link Generator System ---
+        function generateEncodedLink() {
+            const agency = document.getElementById('genAgency').value.trim();
+            const url = document.getElementById('genUrl').value.trim();
+
+            if (!agency || !url) {
+                alert("กรุณากรอกทั้งชื่อหน่วยงานและ URL");
+                return;
+            }
+
+            const dataObj = { agency: agency, url: url };
+            // JSON -> String -> Base64
+            const token = btoa(unescape(encodeURIComponent(JSON.stringify(dataObj))));
+
+            // Get current base URL without parameters
+            const baseUrl = window.location.href.split('?')[0];
+            const finalLink = `${baseUrl}?token=${token}`;
+
+            const resultInput = document.getElementById('genResult');
+            resultInput.value = finalLink;
+            resultInput.select();
+            document.execCommand("copy");
+            alert("✅ สร้างและคัดลอกลิงก์เรียบร้อยแล้ว!\nสามารถนำลิงก์นี้ส่งให้หน่วยงานได้เลย");
+        }
+
+        // Secret trick to show the Admin Link Generator: Double click on the Settings button
+        document.querySelector('[data-bs-target="#settingsCollapse"]').addEventListener('dblclick', function () {
+            const generator = document.getElementById('adminGenerator');
+            generator.classList.remove('d-none');
+            // Auto open settings card to show the generator
+            const collapseElement = document.getElementById('settingsCollapse');
+            const bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: true });
+            bsCollapse.show();
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             addDictRow();
