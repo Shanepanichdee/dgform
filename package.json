@@ -15,7 +15,11 @@
     "mongoose": "^7.6.3",
     "@google-cloud/storage": "^7.1.0"
   },
-  "keywords": ["metadata", "dga", "governance"],
+  "keywords": [
+    "metadata",
+    "dga",
+    "governance"
+  ],
   "author": "Rachen Panichdee",
   "license": "ISC"
 }

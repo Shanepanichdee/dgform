@@ -1,0 +1,37 @@
+graph TD
+    classDef frontend fill:#0f2027,stroke:#00f2fe,stroke-width:2px,color:#fff
+    classDef gateway fill:#203a43,stroke:#ff7675,stroke-width:2px,color:#fff
+    classDef backend fill:#2c5364,stroke:#00b894,stroke-width:2px,color:#fff
+    classDef db fill:#00b894,stroke:#fff,stroke-width:2px,color:#fff
+
+    subgraph "1. Client Layer (Browser)"
+        U1["👤 หน่วยงาน DLA"]
+        U2["👤 หน่วยงาน DIW"]
+    end
+
+    subgraph "2. Frontend Layer (GitHub Pages)"
+        L["Client-side Auth Gateway"]:::gateway
+        F["SPA Web Application"]:::frontend
+    end
+
+    subgraph "3. Backend Engine (Google Cloud)"
+        GAS1{"Apps Script DLA"}:::backend
+        GAS2{"Apps Script DIW"}:::backend
+    end
+
+    subgraph "4. Data Storage (Google Cache)"
+        DB1[/"Sheet DLA"/]:::db
+        DB2[/"Sheet DIW"/]:::db
+    end
+
+    U1 -- "Password dla123" --> L
+    U2 -- "Password diw123" --> L
+    
+    L -- "Redirect id=dla" --> F
+    L -- "Redirect id=diw" --> F
+    
+    F -- "JSON Payload" --> GAS1
+    F -- "JSON Payload" --> GAS2
+    
+    GAS1 -- "Append Rows" --> DB1
+    GAS2 -- "Append Rows" --> DB2
