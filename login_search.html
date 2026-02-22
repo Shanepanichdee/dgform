@@ -231,16 +231,7 @@
                 <label class="form-label">Password (รหัสผ่าน)</label>
                 <input type="password" class="form-control" id="password" placeholder="Enter password" required>
             </div>
-            <div class="form-group" style="margin-bottom: 2rem;">
-                <label class="form-label" style="display: block; text-align: left; margin-bottom: 0.5rem;">System
-                    (ระบบที่ต้องการเข้าใช้งาน)</label>
-                <select class="form-control" id="targetSystem"
-                    style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                    <option value="index.html" style="color: black;">Metadata Registry (ระบบบันทึกข้อมูล)</option>
-                    <option value="catalog.html" style="color: black;">Data Catalog (ระบบสืบค้นข้อมูล)</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-login">Login (เข้าสู่ระบบ)</button>
+            <button type="submit" class="btn-login">Login (ระบบสืบค้นข้อมูล)</button>
             <div class="error-msg" id="errorMsg">Incorrect Username or Password</div>
         </form>
     </div>
@@ -287,8 +278,8 @@
                         queryParams = '?id=diw2';
                     }
 
-                    // Get selected destination system
-                    const targetPage = document.getElementById('targetSystem').value;
+                    // Hardcode target page
+                    const targetPage = 'catalog.html';
 
                     // Small delay for UX
                     setTimeout(() => {

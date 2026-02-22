@@ -1,0 +1,9 @@
+Variable,Description,Type,HasPII,Classification,Sys_Owner,Ref_API_Code,DLA_Audit_Flag
+sys_id,รหัสประจำตัวประชาชน (ดัมมี่) ผู้มีสิทธิ์,String,Yes,Private,IT_Dept,AUTH-001,TRUE
+prov_name,ชื่อจังหวัด,String,No,Public,Admin_Dept,,FALSE
+amp_name,ชื่ออำเภอ,String,No,Public,Admin_Dept,,FALSE
+tam_name,ชื่อตำบล,String,No,Public,Admin_Dept,,FALSE
+dla_name,ชื่อองค์กรปกครองส่วนท้องถิ่น,String,No,Public,Admin_Dept,REG-102,TRUE
+elderly_count,จำนวนผู้มีสิทธิ์รับเบี้ยยังชีพ,Integer,No,Public,Finance_Dept,FIN-220,TRUE
+budget_amount,งบประมาณที่ได้รับการจัดสรร (บาท),Float,No,Private,Finance_Dept,FIN-221,TRUE
+data_period,ปีงบประมาณ,String,No,Public,Admin_Dept,,FALSE

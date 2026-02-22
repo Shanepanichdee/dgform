@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <script>
+        if (!localStorage.getItem('isLoggedIn') && !window.location.href.includes('login.html') && !window.location.href.includes('splash.html')) {
+            window.location.href = 'login.html' + window.location.search;
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DG Data Catalog Explorer</title>
+
+    <!-- Google Fonts: Sarabun & Prompt -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Sarabun', sans-serif;
+            transition: font-family 0.3s ease;
+        }
+
+        body.font-prompt {
+            font-family: 'Prompt', sans-serif;
+        }
+
+        /* Dark Mode Overrides */
+        [data-bs-theme="dark"] body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        [data-bs-theme="dark"] .bg-white,
+        [data-bs-theme="dark"] .card {
+            background-color: #1e1e1e !important;
+            color: #e0e0e0;
+            border-color: #444 !important;
+        }
+
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select,
+        [data-bs-theme="dark"] .input-group-text {
+            background-color: #2b2b2b;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        [data-bs-theme="dark"] .form-control:focus,
+        [data-bs-theme="dark"] .form-select:focus {
+            background-color: #333;
+            color: #fff;
+            border-color: #6497b1;
+        }
+
+        [data-bs-theme="dark"] .text-muted,
+        [data-bs-theme="dark"] .text-secondary {
+            color: #999 !important;
+        }
+
+        [data-bs-theme="dark"] .text-dark {
+            color: #e0e0e0 !important;
+        }
+
+        [data-bs-theme="dark"] .bg-light {
+            background-color: #2b2b2b !important;
+        }
+
+        [data-bs-theme="dark"] .table {
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        [data-bs-theme="dark"] .table th,
+        [data-bs-theme="dark"] .table td {
+            background-color: transparent !important;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        [data-bs-theme="dark"] .domain-badge {
+            background-color: #2b4555;
+            color: #90caf9;
+        }
+
+        [data-bs-theme="dark"] .tag-badge {
+            background-color: #3a5c72;
+            color: #fff;
+        }
+
+        [data-bs-theme="dark"] .modal-content {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #005b96, #003366);
+            color: white;
+            padding: 4rem 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dataset-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            background-color: white;
+        }
+
+        .dataset-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .tag-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: normal;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .domain-badge {
+            background-color: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 40px auto;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Navigation -->
+    <div class="bg-dark text-white py-2 shadow-sm sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-shield-check me-2 text-primary fs-5"></i> <span class="fw-bold">Data Governance</span>
+            </div>
+            <div class="d-flex align-items-center gap-3 nav-links">
+                <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold" onclick="toggleDarkMode()"
+                    id="darkModeBtn">
+                    <i class="bi bi-moon-stars-fill me-1"></i> โหมดกลางคืน
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold" onclick="toggleFont()"
+                    id="fontToggleBtn">
+                    <i class="bi bi-fonts me-1"></i> เปลี่ยนฟอนต์ (Prompt)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold ms-2" onclick="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero mb-5">
+        <div class="container text-center">
+            <h1 class="display-5 fw-bold mb-3"><i class="bi bi-search me-2"></i>Data Catalog Explorer</h1>
+            <p class="lead mb-4 opacity-75">ค้นหาและเข้าถึงรายละเอียดชุดข้อมูลตามหลักธรรมาภิบาลข้อมูล</p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="input-group input-group-lg shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0 ps-0 form-control-lg"
+                            placeholder="ค้นหาชื่อชุดข้อมูล, คำสำคัญ (Keywords), หรือหน่วยงาน..."
+                            onkeyup="handleSearch()">
+                        <button class="btn btn-primary px-4 fw-bold" onclick="filterData()">ค้นหาข้อมูล</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container pb-5">
+        <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border">
+            <h5 class="fw-bold m-0 text-secondary mb-3 mb-md-0" id="resultCount">กำลังเตรียมการเชื่อมต่อ...</h5>
+            <div class="d-flex align-items-center gap-2 w-100" style="max-width: 350px;">
+                <label class="text-muted small text-nowrap"><i class="bi bi-funnel me-1"></i>โดเมน:</label>
+                <select id="domainFilter" class="form-select border-0 bg-light fw-bold text-primary"
+                    onchange="filterData()">
+                    <option value="all">ทั้งหมด (All)</option>
+                    <option value="Citizen">ประชาชน (Citizen)</option>
+                    <option value="CivilServant">ข้าราชการฯ (Civil Servant)</option>
+                    <option value="BudgetFinance">งบประมาณและการคลัง</option>
+                    <option value="Procurement">การจัดซื้อจัดจ้าง</option>
+                    <option value="PublicService">การให้บริการภาครัฐ</option>
+                    <option value="Organization">องค์กรและโครงสร้าง</option>
+                    <option value="Other">อื่นๆ (Other)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="text-center loading-spinner" id="loadingState">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">กำลังดึงชุดข้อมูลล่าสุดจากระบบฐานข้อมูล...</p>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="row g-4" id="catalogGrid">
+            <!-- Cards injected via JS -->
+        </div>
+
+        <div id="noDataState" class="text-center p-5 d-none bg-white rounded-4 shadow-sm mt-3 border">
+            <i class="bi bi-folder-x display-1 text-muted opacity-25 mb-3 d-block"></i>
+            <h4 class="text-muted fw-bold">ไม่พบชุดข้อมูลที่ท่านค้นหา</h4>
+            <p class="text-muted small">โปรดลองเปลี่ยนคำค้นหา คำสำคัญ (Keywords) หรือยกเลิกการกรองโดเมน</p>
+            <button class="btn btn-outline-secondary mt-2 px-4 rounded-pill"
+                onclick="clearSearch()">ล้างการค้นหาทั้งหมด</button>
+        </div>
+    </div>
+
+    <!-- Dataset Detail Modal -->
+    <div class="modal fade" id="datasetDetailModal" tabindex="-1" aria-labelledby="datasetDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold" id="datasetDetailModalLabel"><i
+                            class="bi bi-info-circle me-2"></i>รายละเอียดชุดข้อมูล (Metadata Catalog)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="modalBodyContent">
+                    <!-- Content injected via JS -->
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-warning fw-bold px-4" id="modalEditLink" style="display:none;">
+                        <i class="bi bi-pencil-square me-1"></i> แก้ไขข้อมูล (Admin Only)
+                    </button>
+                    <button type="button" class="btn btn-secondary fw-bold px-4"
+                        data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+                    <a href="#" class="btn btn-outline-primary fw-bold px-4" id="modalExternalLink" target="_blank"
+                        style="display:none;"><i class="bi bi-box-arrow-up-right me-1"></i> เข้าถึงข้อมูลต้นฉบับ
+                        (เปิดโอกาสการต่อยอด)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let allDatasets = [];
+        let searchTimeout = null;
+        window.currentScriptUrl = '';
+
+        // Load Config Logic from index.html (Shared Code)
+        function loadConfig() {
+            const shortcodes = {
+                'dla': { url: 'https://script.google.com/macros/s/AKfycbwdfCsonERY5XjkPUJypgGCOKW6NNKM5mnDUE0yB8bXv2X05g9anHVNxlYGdO0nV1MnuQ/exec' },
+                'dla2': { url: 'https://script.google.com/macros/s/AKfycbzKnB6GjUD9AjHf3KsULx7jtwYCj7DqxDTUDgP9U9I9zqq97TOPLp2y1OKUW6B63EaT/exec' },
+                'diw': { url: 'https://script.google.com/macros/s/AKfycbxv0FI96eLnQ5pVFX7rOB67k9rIMYh7C8ZiPFZp0hK9sAFHhvzNnSCCW8hWZ_lzgCXCOw/exec' },
+                'diw2': { url: 'https://script.google.com/macros/s/AKfycbyWe7xf8ARJif7omiquFvDX71EKXpfItM-21gUHI49zNiFr4TYGFoz2eAfSseLLu3FO/exec' }
+            };
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const shortcodeId = urlParams.get('id');
+
+            let config = null;
+
+            if (shortcodeId && shortcodes[shortcodeId.toLowerCase()]) {
+                config = shortcodes[shortcodeId.toLowerCase()];
+            } else if (token) {
+                // Future expansion: fetch config from token API
+                // For now, demo falls back to dla2 if token is invalid
+                config = shortcodes['dla2'];
+            } else {
+                // Absolute Default Fallback (Lock to dla2 as requested by Admin)
+                config = shortcodes['dla2'];
+            }
+
+            if (config && config.url) {
+                window.currentScriptUrl = config.url;
+            } else {
+                window.currentScriptUrl = '';
+            }
+        }
+
+        async function fetchData() {
+            if (!window.currentScriptUrl) {
+                document.getElementById('resultCount').innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> ไม่พบการเชื่อมต่อฐานข้อมูล โปรดเข้าผ่านลิงก์ของหน่วยงาน (เช่น ?id=dla)</span>';
+                document.getElementById('loadingState').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('catalogGrid').innerHTML = '';
+            document.getElementById('resultCount').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> กำลังดาวน์โหลดข้อมูลจาก Repository...';
+
+            try {
+                // Fetch data via GET request (Triggers doGet in Apps Script)
+                const response = await fetch(window.currentScriptUrl);
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    // Reverse to show newest on top
+                    allDatasets = (data.data || []).reverse();
+                    populateDynamicDomains();
+                    filterData();
+                } else {
+                    throw new Error(data.message || "Unknown Error from Server");
+                }
+            } catch (err) {
+                console.error("Fetch Data Error:", err);
+                document.getElementById('resultCount').innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> เกิดข้อผิดพลาดในการโหลดข้อมูล อาจเป็นเพราะ URL ไม่ถูกต้องหรือเซิร์ฟเวอร์ยังไม่อัปเดตฟังก์ชัน doGet()</span>';
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterData, 300); // Debounce to prevent lag while typing
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('domainFilter').value = 'all';
+            filterData();
+        }
+
+        function populateDynamicDomains() {
+            const select = document.getElementById('domainFilter');
+            const existingValues = Array.from(select.options).map(opt => opt.value);
+
+            // Extract unique domains from actual data
+            const uniqueDomains = [...new Set(allDatasets.map(item => item.domain).filter(Boolean))];
+
+            uniqueDomains.forEach(domain => {
+                if (!existingValues.includes(domain)) {
+                    const option = document.createElement('option');
+                    option.value = domain;
+                    option.textContent = domain;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function filterData() {
+            const getCountHtml = (count) => `<i class="bi bi-card-list me-1"></i> ค้นพบทั้งหมด <span class="text-primary fw-bold mx-1">${count}</span> ชุดข้อมูล`;
+
+            if (allDatasets.length === 0) {
+                document.getElementById('resultCount').innerHTML = getCountHtml(0);
+                document.getElementById('noDataState').classList.remove('d-none');
+                return;
+            }
+
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const domain = document.getElementById('domainFilter').value;
+
+            const filtered = allDatasets.filter(item => {
+                // Domain Match
+                const matchDomain = (domain === 'all') || ((item.domain || "") === domain);
+
+                // Advanced Free Text Match (Deep Search across all properties)
+                // We combine all values of the object into a single string for robust searching
+                const allTextContent = Object.values(item).map(v => String(v || '')).join(' ').toLowerCase();
+                const matchQuery = !query || allTextContent.includes(query);
+
+                return matchDomain && matchQuery;
+            });
+
+            renderCards(filtered);
+        }
+
+        function renderCards(datasets) {
+            document.getElementById('resultCount').innerHTML = `<i class="bi bi-card-list me-1"></i> ค้นพบสอดคล้อง <span class="text-primary fw-bold mx-1">${datasets.length}</span> ชุดข้อมูล`;
+            const grid = document.getElementById('catalogGrid');
+            const noData = document.getElementById('noDataState');
+
+            grid.innerHTML = '';
+
+            if (datasets.length === 0) {
+                noData.classList.remove('d-none');
+                return;
+            } else {
+                noData.classList.add('d-none');
+            }
+
+            datasets.forEach(item => {
+                // Convert CSV keywords to Badges
+                let keywordBadges = '';
+                if (item.keywords && item.keywords.trim() !== '') {
+                    const kwArray = String(item.keywords).split(',');
+                    keywordBadges = kwArray.map(kw => `<span class="badge tag-badge shadow-sm">${kw.trim()}</span>`).join('');
+                } else {
+                    keywordBadges = `<span class="badge bg-light text-muted border fst-italic">ไม่มีแท็ก (No Tags)</span>`;
+                }
+
+                // Check privacy
+                const isPrivate = String(item.classification || '').toLowerCase().includes('private');
+                const lockIcon = isPrivate ? 'bi-shield-lock-fill text-danger' : 'bi-shield-check text-success';
+                const classLabel = item.classification || 'Private';
+
+                const card = document.createElement('div');
+                card.className = 'col-lg-4 col-md-6';
+                card.innerHTML = `
+                    <div class="card dataset-card h-100 p-2">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${item.domain || 'ไม่ระบุ'}</span>
+                                <span class="badge bg-light text-dark border"><i class="bi ${lockIcon} me-1"></i> ${classLabel}</span>
+                            </div>
+                            <h5 class="card-title fw-bold text-primary mb-1 mt-2 line-clamp-2" title="${item.title || 'Untitled'}">${item.title || '<span class="text-danger fst-italic">Untitled Dataset</span>'}</h5>
+                            <p class="text-muted small mb-3"><i class="bi bi-building me-1"></i> ${item.submitterAgency || 'ไม่ระบุหน่วยงาน'}</p>
+                            
+                            <p class="card-text small text-secondary flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; height: 4.5em;">
+                                ${item.description || '<span class="text-muted fst-italic">...ไม่มีคำอธิบายเพิ่มเติมสำหรับชุดข้อมูลนี้...</span>'}
+                            </p>
+                            
+                            <div class="mt-3 border-top pt-3">
+                                <div class="d-flex flex-wrap gap-1">
+                                    ${keywordBadges}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-end pb-3 px-3">
+                            <button class="btn btn-sm btn-outline-primary fw-bold px-3 w-100 stretched-link" onclick="showDetail('${item.datasetId}')"><i class="bi bi-eye me-1"></i> อ่านรายละเอียดชุดข้อมูล</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showDetail(datasetId) {
+            const dataset = allDatasets.find(d => String(d.datasetId) === String(datasetId));
+            if (!dataset) return;
+
+            const modalBody = document.getElementById('modalBodyContent');
+
+            // Format timestamps reliably
+            const formatLocDate = (dString) => {
+                if (!dString) return '-';
+                try {
+                    const d = new Date(dString);
+                    if (isNaN(d.getTime())) return dString;
+                    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+                } catch (e) { return dString; }
+            };
+
+            const created = formatLocDate(dataset.createdDate);
+            const updated = formatLocDate(dataset.lastModifiedDate);
+
+            // Convert CSV keywords to Badges
+            let keywordBadges = '';
+            if (dataset.keywords && dataset.keywords.trim() !== '') {
+                const kwArray = String(dataset.keywords).split(',');
+                keywordBadges = kwArray.map(kw => `<span class="badge tag-badge shadow-sm">${kw.trim()}</span>`).join('');
+            } else {
+                keywordBadges = `<span class="text-muted fst-italic">ไม่มีแท็ก (No Tags)</span>`;
+            }
+
+            modalBody.innerHTML = `
+                <h4 class="fw-bold text-primary mb-3">${dataset.title || 'Untitled Dataset'}</h4>
+                <p class="text-muted mb-4"><i class="bi bi-building me-1"></i> หน่วยงาน: <strong>${dataset.submitterAgency || 'ไม่ระบุ'}</strong></p>
+                
+                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-card-text me-2"></i>คำอธิบายชุดข้อมูล (Description)</h6>
+                <p class="mb-4">${dataset.description || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-bullseye me-2"></i>วัตถุประสงค์ (Objective)</h6>
+                <p class="mb-4">${dataset.objective || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-list-columns-reverse me-2"></i>คุณลักษณะชุดข้อมูล (Properties)</h6>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-sm rounded shadow-sm align-middle">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light text-end pe-3" style="width: 35%;">โดเมนข้อมูล (Domain)</th>
+                                <td class="ps-3">${dataset.domain || '-'}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">กลุ่มหัวข้อระดับประเทศ</th>
+                                <td class="ps-3">${dataset.topicCategory || '-'}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">ระดับการเผยแพร่</th>
+                                <td class="ps-3"><span class="badge ${String(dataset.classification).toLowerCase().includes('private') ? 'bg-danger' : 'bg-success'}">${dataset.classification || 'Private'}</span></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">ความถี่ที่ปรับปรุง</th>
+                                <td class="ps-3">${dataset.updateFreqValue || ''} ${dataset.updateFreqUnit || '-'}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">รูปแบบไฟล์ (Format)</th>
+                                <td class="ps-3"><span class="badge border border-secondary text-secondary">${dataset.fileFormat || '-'}</span></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">สัญญาอนุญาต (License)</th>
+                                <td class="ps-3">${dataset.license || '-'}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">วันที่สร้าง</th>
+                                <td class="ps-3">${created}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-end pe-3">วันที่ปรับปรุงล่าสุด</th>
+                                <td class="ps-3">${updated}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-2">
+                    <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-tags me-2"></i>คำสำคัญ (Keywords)</h6>
+                    <div>${keywordBadges}</div>
+                </div>
+            `;
+
+            // Action button (External link if provided)
+            const externalBtn = document.getElementById('modalExternalLink');
+            if (dataset.accessUrl && dataset.accessUrl.trim() !== '') {
+                externalBtn.href = dataset.accessUrl;
+                externalBtn.style.display = 'inline-block';
+            } else {
+                externalBtn.style.display = 'none';
+            }
+
+            // Edit button setup (Admin Only)
+            const editBtn = document.getElementById('modalEditLink');
+            editBtn.style.display = 'inline-block';
+            editBtn.onclick = () => {
+                const pwd = prompt("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
+                if (pwd !== "admin1234") {
+                    if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง!");
+                    return; // Cancel edit
+                }
+                sessionStorage.setItem('editAuthed_' + dataset.datasetId, 'true');
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                const token = urlParams.get('token');
+
+                let editUrl = `index.html?editId=${encodeURIComponent(dataset.datasetId)}`;
+                if (id) editUrl += `&id=${id}`;
+                else if (token) editUrl += `&token=${token}`;
+
+                window.location.href = editUrl;
+            };
+
+            // Init & Show Modal
+            const detailModal = new bootstrap.Modal(document.getElementById('datasetDetailModal'));
+            detailModal.show();
+        }
+
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply Theme/Font preferences
+            if (localStorage.getItem('preferredFont') === 'prompt') {
+                document.body.classList.add('font-prompt');
+                const ftBtn = document.getElementById('fontToggleBtn');
+                if (ftBtn) ftBtn.innerHTML = '<i class="bi bi-fonts me-1"></i> กลับไปใช้ Sarabun';
+            }
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                const dkBtn = document.getElementById('darkModeBtn');
+                if (dkBtn) dkBtn.innerHTML = '<i class="bi bi-sun-fill me-1"></i> โหมดสว่าง';
+            }
+
+            loadConfig();
+            fetchData();
+        });
+
+        // Theme and Font Logic
+        function toggleFont() {
+            const body = document.body;
+            const btn = document.getElementById('fontToggleBtn');
+            body.classList.toggle('font-prompt');
+
+            if (body.classList.contains('font-prompt')) {
+                btn.innerHTML = '<i class="bi bi-fonts me-1"></i> กลับไปใช้ Sarabun';
+                localStorage.setItem('preferredFont', 'prompt');
+            } else {
+                btn.innerHTML = '<i class="bi bi-fonts me-1"></i> เปลี่ยนฟอนต์ (Prompt)';
+                localStorage.setItem('preferredFont', 'sarabun');
+            }
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const btn = document.getElementById('darkModeBtn');
+
+            if (html.getAttribute('data-bs-theme') === 'dark') {
+                html.setAttribute('data-bs-theme', 'light');
+                btn.innerHTML = '<i class="bi bi-moon-stars-fill me-1"></i> โหมดกลางคืน';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                btn.innerHTML = '<i class="bi bi-sun-fill me-1"></i> โหมดสว่าง';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function logout() {
+            if (confirm('ต้องการออกจากระบบใช่หรือไม่? (Are you sure you want to logout?)')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+
+                // Clear any stored admin session keys for editing
+                Object.keys(sessionStorage).forEach(key => {
+                    if (key.startsWith('editAuthed_')) {
+                        sessionStorage.removeItem(key);
+                    }
+                });
+
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+
+</html>
