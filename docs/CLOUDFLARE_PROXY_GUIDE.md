@@ -75,21 +75,24 @@ export default {
 
             // รอการตอบกลับจาก Google
             let response = await fetch(modifiedRequest);
-            let responseBody = await response.arrayBuffer();
+            let responseBody = await response.text(); // อ่านแบบ text เพื่อรักษา Format ภาษาไทย
             
-            // ส่งข้อมูลจริงกลับไปยังผู้ใช้ โดยแนบ Header ป้องกัน CORS error กลับไปด้วย
+            // คัดลอก Headers เดิมจาก Google (ที่มีข้อมูล charset=utf-8) แล้วเสริมด้วย CORS ของเรา
+            const newHeaders = new Headers(response.headers);
+            newHeaders.set("Access-Control-Allow-Origin", "*");
+            newHeaders.set("Access-Control-Allow-Methods", "GET,HEAD,POST,OPTIONS");
+            newHeaders.set("Access-Control-Allow-Headers", "Content-Type");
+            
+            // ส่งข้อมูลจริงกลับไปยังผู้ใช้
             return new Response(responseBody, {
                 status: response.status,
-                headers: {
-                    ...response.headers,
-                    ...corsHeaders
-                }
+                headers: newHeaders
             });
 
         } catch (error) {
             return new Response(JSON.stringify({ result: 'error', message: 'Proxy Failed' }), {
                 status: 500,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders }
+                headers: { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' }
             });
         }
     }

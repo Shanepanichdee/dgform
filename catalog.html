@@ -285,7 +285,8 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
-            const shortcodeId = urlParams.get('id');
+            // อ่านค่ารหัสหน่วยงานแบบซ่อนจาก LocalStorage (ถ้ามี) หรือจาก URL ( fallback สำหรับลิงก์เก่า )
+            const shortcodeId = localStorage.getItem('agencyId') || urlParams.get('id');
 
             let config = null;
 

@@ -287,12 +287,19 @@
                         queryParams = data.queryParams;
                     }
 
+                    // สกัดค่า id (ชื่อย่อหน่วยงาน) ออกมาจาก queryParams เพื่อเก็บเป็นความลับในเครื่อง
+                    const urlParams = new URLSearchParams(queryParams);
+                    const agencyId = urlParams.get('id');
+                    if (agencyId) {
+                        localStorage.setItem('agencyId', agencyId);
+                    }
+
                     // Hardcode target page
                     const targetPage = 'index.html';
 
-                    // Small delay for UX
+                    // Small delay for UX - ทำการวิ่งไปยังหน้าเว็บโล่งๆ โดยไม่ต้องโชว์ URL Parameter ห้อยท้าย
                     setTimeout(() => {
-                        window.location.href = targetPage + queryParams;
+                        window.location.href = targetPage;
                     }, 500);
                 } else {
                     throw new Error(data.message || 'Auth Failed');
