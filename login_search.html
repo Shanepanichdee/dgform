@@ -255,27 +255,36 @@
             err.style.display = 'none';
 
             try {
-                // Hardcoded Client-Side Login for GitHub Pages
-                // Make username lowercase and trim spaces for mobile keyboards
+                // Remove Hardcoded logic and use Apps Script Backend
                 const usernameInput = usr.trim().toLowerCase();
                 const passwordInput = pwd.trim();
 
-                // Allow specific passwords for the admin user
-                const validPasswords = ['admin@123', 'dla123', 'diw123', 'diw2_123'];
+                // Central Authentication API (using dla2 endpoint as the auth server via Cloudflare Proxy)
+                const AUTH_URL = 'https://dgform-proxy.shanepanichdee.workers.dev/';
 
-                if (usernameInput === 'admin' && validPasswords.includes(passwordInput)) {
+                const response = await fetch(AUTH_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: usernameInput,
+                        password: passwordInput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.result === 'success') {
                     // Success
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('username', 'admin');
+                    localStorage.setItem('username', data.username);
 
-                    // Map password to specific agency shortcode
+                    // Map password to specific agency shortcode via query param
                     let queryParams = window.location.search;
-                    if (passwordInput === 'dla123') {
-                        queryParams = '?id=dla2';
-                    } else if (passwordInput === 'diw123') {
-                        queryParams = '?id=diw';
-                    } else if (passwordInput === 'diw2_123') {
-                        queryParams = '?id=diw2';
+                    if (data.queryParams) {
+                        queryParams = data.queryParams;
                     }
 
                     // Hardcode target page
@@ -286,7 +295,7 @@
                         window.location.href = targetPage + queryParams;
                     }, 500);
                 } else {
-                    throw new Error('Auth Failed');
+                    throw new Error(data.message || 'Auth Failed');
                 }
             } catch (error) {
                 console.error(error);
