@@ -163,6 +163,41 @@ function deleteRowsByValue(sheet, keyName, keyValue) {
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
+    
+    // ==========================================
+    // 1. Authentication Check
+    // ==========================================
+    if (data.action === 'login') {
+      const usernameInput = (data.username || '').trim().toLowerCase();
+      const passwordInput = (data.password || '').trim();
+      const validPasswords = ['admin@123', 'dla123', 'diw123', 'diw2_123'];
+      
+      if (usernameInput === 'admin' && validPasswords.includes(passwordInput)) {
+        let queryParams = '';
+        if (passwordInput === 'dla123') {
+           queryParams = '?id=dla2'; // fallback fallback is dla2, but keeping original logic
+        } else if (passwordInput === 'diw123') {
+           queryParams = '?id=diw';
+        } else if (passwordInput === 'diw2_123') {
+           queryParams = '?id=diw2';
+        }
+
+        return ContentService.createTextOutput(JSON.stringify({
+          result: 'success',
+          username: 'admin',
+          queryParams: queryParams
+        })).setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService.createTextOutput(JSON.stringify({
+          result: 'error',
+          message: 'Auth Failed'
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    
+    // ==========================================
+    // 2. Metadata Processing (Insert/Update)
+    // ==========================================
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
     const metaSheet = ensureSheet(ss, 'Metadata_Repository');
