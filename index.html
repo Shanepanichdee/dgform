@@ -15,8 +15,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts: Sarabun (Official Thai Font) -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Sarabun & Prompt -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&family=Sarabun:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
@@ -37,6 +39,11 @@
             font-family: 'Sarabun', sans-serif;
             background-color: var(--light-bg);
             color: #2c3e50;
+            transition: font-family 0.3s ease;
+        }
+
+        body.font-prompt {
+            font-family: 'Prompt', sans-serif;
         }
 
         /* Header - Solid Color */
@@ -219,6 +226,76 @@
             /* Delete */
             min-width: 50px;
         }
+
+        /* Dark Mode Overrides */
+        [data-bs-theme="dark"] body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        [data-bs-theme="dark"] .card {
+            background-color: #1e1e1e;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            background-color: #2b2b2b;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        [data-bs-theme="dark"] .form-control:focus,
+        [data-bs-theme="dark"] .form-select:focus {
+            background-color: #333;
+            color: #fff;
+            border-color: #6497b1;
+        }
+
+        [data-bs-theme="dark"] .form-label {
+            color: #ccc;
+        }
+
+        [data-bs-theme="dark"] .table {
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        [data-bs-theme="dark"] .table th,
+        [data-bs-theme="dark"] .table td {
+            background-color: transparent !important;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        [data-bs-theme="dark"] .section-divider {
+            border-bottom-color: #444;
+        }
+
+        [data-bs-theme="dark"] .text-muted {
+            color: #999 !important;
+        }
+
+        [data-bs-theme="dark"] .card-header .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        [data-bs-theme="dark"] .header-section {
+            border-bottom: none;
+        }
+
+        [data-bs-theme="dark"] .text-primary {
+            color: #90caf9 !important;
+        }
+
+        [data-bs-theme="dark"] .text-success {
+            color: #81c784 !important;
+        }
+
+        [data-bs-theme="dark"] .keyword-badge {
+            background-color: #3a5c72;
+        }
     </style>
 </head>
 
@@ -228,84 +305,51 @@
     <div class="header-section">
         <div class="container d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-                <div class="hero-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                <div class="hero-icon me-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                         class="bi bi-diagram-3-fill" viewBox="0 0 16 16">
                         <path fill-rule="evenodd"
                             d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5v-1zm-6 8A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm6 0A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm6 0a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1z" />
                     </svg>
                 </div>
                 <div>
-                    <h2 class="header-title m-0">แบบฟอร์มการจัดทำรายละเอียดข้อมูล ตามหลักธรรมาภิบาลข้อมูล</h2>
-                    <small class="text-white opacity-75">Data Governance & Metadata Documentation Form</small>
+                    <h4 class="m-0 fw-bold header-title">DG Data Repository</h4>
+                    <small class="opacity-75">ลงทะเบียนบัญชีข้อมูล (Data Catalog) และพจนานุกรมข้อมูล (Data
+                        Dictionary)</small>
                 </div>
             </div>
+            <div class="d-flex align-items-center gap-3 nav-links">
+                <button type="button" class="btn btn-sm btn-outline-warning border-2 fw-bold" id="navEditBtn"
+                    style="display:none;" onclick="promptEditId()">
+                    <i class="bi bi-pencil-square me-1"></i> เลือกรหัสแก้ไข (Edit)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold" onclick="toggleDarkMode()"
+                    id="darkModeBtn">
+                    <i class="bi bi-moon-stars-fill me-1"></i> โหมดกลางคืน
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold" onclick="toggleFont()"
+                    id="fontToggleBtn">
+                    <i class="bi bi-fonts me-1"></i> เปลี่ยนฟอนต์ (Prompt)
+                </button>
+                <span class="border-end opacity-50 mx-1" style="height: 20px;"></span>
 
-            <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold me-2" onclick="logout()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-box-arrow-right me-1" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z" />
-                    <path fill-rule="evenodd"
-                        d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z" />
-                </svg>
-                Logout
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold" data-bs-toggle="collapse"
-                data-bs-target="#settingsCollapse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-gear-fill me-1" viewBox="0 0 16 16">
-                    <path
-                        d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.858 2.929 2.929 0 0 1 0 5.858z" />
-                </svg>
-                ตั้งค่า
-            </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-2 fw-bold ms-2" onclick="logout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-box-arrow-right me-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z" />
+                        <path fill-rule="evenodd"
+                            d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="container pb-5">
-        <form id="metadataForm" class="needs-validation" novalidate>
-
-            <div class="col-12 collapse mb-4" id="settingsCollapse">
-                <div class="card card-body bg-light border-0">
-                    <label for="scriptUrl" class="form-label fw-bold"><i class="bi bi-link-45deg me-1"></i>Google Apps
-                        Script Web App URL (ตั้งค่าตามหน่วยงาน)</label>
-                    <div class="input-group">
-                        <input type="url" class="form-control" id="scriptUrl"
-                            placeholder="https://script.google.com/macros/s/...">
-                        <button class="btn btn-success" type="button" onclick="saveConfig()"><i
-                                class="bi bi-save me-1"></i>บันทึก URL</button>
-                    </div>
-                    <small class="text-muted mt-1 d-block">
-                        <i class="bi bi-info-circle me-1"></i>
-                        ตั้งค่าเฉพาะกรณีที่ผู้ดูแลระบบแจ้งให้ใส่ URL ด้วยตนเอง
-                    </small>
-                </div>
-
-                <!-- Admin Link Generator (Hidden by default, can be toggled via console or a secret button) -->
-                <div class="card card-body bg-dark text-white mt-3 d-none" id="adminGenerator">
-                    <h6><i class="bi bi-key-fill text-warning me-2"></i>เครื่องมือสร้างลิงก์เข้ารหัส (Admin Only)</h6>
-                    <div class="row g-2">
-                        <div class="col-md-5">
-                            <input type="text" id="genAgency" class="form-control form-control-sm"
-                                placeholder="ชื่อหน่วยงาน เช่น กรมสรรพากร">
-                        </div>
-                        <div class="col-md-7">
-                            <input type="url" id="genUrl" class="form-control form-control-sm"
-                                placeholder="Google Script URL ของหน่วยงานนั้น">
-                        </div>
-                        <div class="col-12 mt-2">
-                            <button class="btn btn-warning btn-sm w-100 fw-bold"
-                                onclick="generateEncodedLink()">สร้างลิงก์สำหรับส่ง</button>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <input type="text" id="genResult"
-                                class="form-control form-control-sm bg-secondary text-white border-secondary" readonly
-                                placeholder="ผลลัพธ์ลิงก์ลับจะแสดงที่นี่...">
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Main Form Container -->
+    <div class="container py-4">
+        <form id="metadataForm" onsubmit="event.preventDefault();" novalidate>
 
             <!-- Submitter Agency Card -->
             <div class="card mb-4"
@@ -313,14 +357,16 @@
                 <div class="card-body py-3">
                     <div class="row align-items-center g-3">
                         <div class="col-md-3">
-                            <h6 class="text-primary m-0 fw-bold"><i class="bi bi-building me-2"></i>หน่วยงานผู้ส่ง</h6>
+                            <h6 class="text-primary m-0 fw-bold"><i class="bi bi-building me-2"></i>หน่วยงานผู้ส่ง
+                            </h6>
                             <small class="text-muted">Submitting Agency</small>
                         </div>
                         <div class="col-md-9">
                             <input type="text" class="form-control fw-bold" id="submitterAgency"
                                 placeholder="ระบุชื่อหน่วยงานที่กรอกข้อมูล เช่น กรมการปกครอง กระทรวงมหาดไทย" required>
                             <small class="text-muted"><i
-                                    class="bi bi-lock-fill text-secondary me-1"></i>แอดมินของระบบจะเป็นผู้เแบ่งปัน URL
+                                    class="bi bi-lock-fill text-secondary me-1"></i>แอดมินของระบบจะเป็นผู้เแบ่งปัน
+                                URL
                                 ให้แต่ละหน่วยงาน — ผู้กรอกไม่สามารถเข้าถึง Google Sheet ได้โดยตรง</small>
                         </div>
                     </div>
@@ -338,13 +384,17 @@
                         <div class="col-md-9">
                             <select class="form-select form-select-lg border-primary" id="businessDomain" required
                                 onchange="toggleDomainOther()">
-                                <option value="" selected disabled>-- เลือกโดเมนธุรกิจ (Select Business Domain) --
+                                <option value="" selected disabled>-- เลือกโดเมนธุรกิจ (Select Business
+                                    Domain) --
                                 </option>
                                 <option value="Citizen">1. ประชาชน (Citizen)</option>
-                                <option value="CivilServant">2. ข้าราชการ/เจ้าหน้าที่รัฐ (Civil Servant)</option>
-                                <option value="BudgetFinance">3. งบประมาณและการคลัง (Budget & Finance)</option>
+                                <option value="CivilServant">2. ข้าราชการ/เจ้าหน้าที่รัฐ (Civil Servant)
+                                </option>
+                                <option value="BudgetFinance">3. งบประมาณและการคลัง (Budget & Finance)
+                                </option>
                                 <option value="Procurement">4. การจัดซื้อจัดจ้าง (Procurement)</option>
-                                <option value="PublicService">5. การให้บริการภาครัฐ (Public Service)</option>
+                                <option value="PublicService">5. การให้บริการภาครัฐ (Public Service)
+                                </option>
                                 <option value="Organization">6. องค์กรและโครงสร้าง (Organization)</option>
                                 <option value="Other">7. อื่น ๆ โปรดระบุ (Other)</option>
                             </select>
@@ -370,9 +420,19 @@
                     </div>
                     <div>
                         <button type="button" class="btn btn-sm btn-outline-light me-1"
-                            onclick="exportData('glossary', 'csv')"><i class="bi bi-download"></i> CSV</button>
+                            onclick="exportData('glossary', 'csv')"><i class="bi bi-download"></i>
+                            CSV</button>
                         <button type="button" class="btn btn-sm btn-outline-light me-2"
-                            onclick="exportData('glossary', 'json')"><i class="bi bi-download"></i> JSON</button>
+                            onclick="exportData('glossary', 'json')"><i class="bi bi-download"></i>
+                            JSON</button>
+                        <input type="file" id="glossaryImportFile" accept=".csv,.json" class="d-none"
+                            onchange="importGlossary()">
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold me-2"
+                            onclick="document.getElementById('glossaryImportFile').click()">
+                            <i class="bi bi-upload me-1"></i> Import
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold me-2"
+                            onclick="addCustomColumn('glossaryTable', '')">+ เพิ่มฟิลด์ใหม่</button>
                         <button type="button" class="btn btn-sm btn-light text-success fw-bold"
                             onclick="addGlossaryRow()">+
                             เพิ่มคำศัพท์</button>
@@ -383,16 +443,18 @@
                         <table class="table table-striped table-hover mb-0" id="glossaryTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="30%">คำศัพท์ (Term)</th>
-                                    <th width="40%">ความหมาย (Definition)</th>
-                                    <th width="20%">เจ้าของ/แหล่งอ้างอิง</th>
-                                    <th width="10%">ลบ</th>
+                                    <th width="30%" data-key="term">คำศัพท์ (Term)</th>
+                                    <th width="40%" data-key="definition">ความหมาย (Definition)</th>
+                                    <th width="20%" data-key="source">เจ้าของ/แหล่งอ้างอิง</th>
+                                    <th width="10%" class="text-center">ลบ</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div id="emptyGlossaryMsg" class="text-center p-4 text-muted">กรุณาระบุคำศัพท์ทางธุรกิจอย่างน้อย 1
+                    <div id="emptyGlossaryMsg" class="text-center p-4 text-muted">
+                        กรุณาระบุคำศัพท์ทางธุรกิจอย่างน้อย
+                        1
                         รายการ</div>
                 </div>
             </div>
@@ -412,13 +474,23 @@
                     </div>
                     <div>
                         <button type="button" class="btn btn-sm btn-outline-light me-1"
-                            onclick="exportData('metadata', 'csv')"><i class="bi bi-download"></i> CSV</button>
-                        <button type="button" class="btn btn-sm btn-outline-light"
-                            onclick="exportData('metadata', 'json')"><i class="bi bi-download"></i> JSON</button>
+                            onclick="exportData('metadata', 'csv')"><i class="bi bi-download"></i>
+                            CSV</button>
+                        <button type="button" class="btn btn-sm btn-outline-light me-2"
+                            onclick="exportData('metadata', 'json')"><i class="bi bi-download"></i>
+                            JSON</button>
+                        <input type="file" id="metaImportFile" accept=".csv,.json" class="d-none"
+                            onchange="importMetadata()">
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold me-2"
+                            onclick="document.getElementById('metaImportFile').click()">
+                            <i class="bi bi-upload me-1"></i> Import
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light text-success fw-bold"
+                            onclick="addCustomMetaField()">+ เพิ่มฟิลด์ใหม่</button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
+                    <div id="metaFieldsContainer" class="row g-3">
 
                         <!-- 2.1 General Info -->
                         <div class="col-12 section-divider">2.1 ข้อมูลทั่วไป (General Info)</div>
@@ -454,7 +526,8 @@
                         </div>
 
                         <!-- 2.2 Classification & Governance -->
-                        <div class="col-12 section-divider">2.2 การจัดจำแนกและธรรมาภิบาลข้อมูล (Classification &
+                        <div class="col-12 section-divider">2.2 การจัดจำแนกและธรรมาภิบาลข้อมูล
+                            (Classification &
                             Governance)</div>
 
                         <div class="col-md-4">
@@ -478,8 +551,8 @@
 
                         <!-- 5 AXES -->
                         <div class="col-md-4">
-                            <label for="govDataCategory" class="form-label">1. หมวดหมู่ (Data Category) <span
-                                    class="required-asterisk">*</span></label>
+                            <label for="govDataCategory" class="form-label">1. หมวดหมู่ (Data Category)
+                                <span class="required-asterisk">*</span></label>
                             <select class="form-select" id="govDataCategory" required>
                                 <option value="1.1 Public">1.1 Public (สาธารณะ)</option>
                                 <option value="1.2 Internal">1.2 Internal (ภายใน)</option>
@@ -489,8 +562,8 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="classification" class="form-label">2. ชั้นความลับ (Confidentiality) <span
-                                    class="text-danger small">* (มสพร. 8)</span></label>
+                            <label for="classification" class="form-label">2. ชั้นความลับ (Confidentiality)
+                                <span class="text-danger small">* (มสพร. 8)</span></label>
                             <select class="form-select" id="classification" required>
                                 <option value="Open">เปิดเผย (Open)</option>
                                 <option value="Private">เผยแพร่ภายใน (Private)</option>
@@ -541,9 +614,11 @@
                                 <option value="Open Government Licence">Open Government Licence - Thailand
                                     (สัญญานุญาตข้อมูลภาครัฐ)</option>
                                 <option value="CC-BY">Creative Commons Attribution 4.0 (CC-BY)</option>
-                                <option value="CC-BY-SA">Creative Commons Share-Alike 4.0 (CC-BY-SA)</option>
+                                <option value="CC-BY-SA">Creative Commons Share-Alike 4.0 (CC-BY-SA)
+                                </option>
                                 <option value="CC-0">Creative Commons Zero (CC0 - Public Domain)</option>
-                                <option value="Agency Specific">Agency Specific License (สัญญาอนุญาตของหน่วยงาน)
+                                <option value="Agency Specific">Agency Specific License
+                                    (สัญญาอนุญาตของหน่วยงาน)
                                 </option>
                                 <option value="Other">Other (อื่นๆ - โปรดระบุ)</option>
                             </select>
@@ -560,8 +635,8 @@
                             <input type="text" class="form-control" id="owner" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="maintainer" class="form-label">หน่วยงานปรับปรุงข้อมูล (Maintainer) <span
-                                    class="required-asterisk">*</span></label>
+                            <label for="maintainer" class="form-label">หน่วยงานปรับปรุงข้อมูล (Maintainer)
+                                <span class="required-asterisk">*</span></label>
                             <input type="text" class="form-control" id="maintainer" required>
                         </div>
                         <div class="col-md-6">
@@ -577,7 +652,9 @@
                         </div>
 
                         <!-- 2.4 Technical & Coverage -->
-                        <div class="col-12 section-divider">2.4 ข้อมูลทางเทคนิคและขอบเขต (Technical & Coverage)</div>
+                        <div class="col-12 section-divider">2.4 ข้อมูลทางเทคนิคและขอบเขต (Technical &
+                            Coverage)
+                        </div>
 
                         <div class="col-md-4">
                             <label for="fileFormat" class="form-label">รูปแบบไฟล์ (Format) <span
@@ -607,8 +684,8 @@
                                 placeholder="เช่น 1 (ทุก 1 ปี)">
                         </div>
                         <div class="col-md-6">
-                            <label for="geoCoverage" class="form-label">ขอบเขตเชิงภูมิศาสตร์ (Geo Coverage) <span
-                                    class="required-asterisk">*</span></label>
+                            <label for="geoCoverage" class="form-label">ขอบเขตเชิงภูมิศาสตร์ (Geo Coverage)
+                                <span class="required-asterisk">*</span></label>
                             <input type="text" class="form-control" id="geoCoverage" required
                                 placeholder="เช่น ประเทศไทย, จังหวัดขอนแก่น">
                         </div>
@@ -638,7 +715,8 @@
                                         <input type="date" class="form-control" id="lastModifiedDate">
                                     </div>
                                     <div class="col-md-12">
-                                        <label class="form-label">เงื่อนไขการเข้าถึง (Accessible Condition)</label>
+                                        <label class="form-label">เงื่อนไขการเข้าถึง (Accessible
+                                            Condition)</label>
                                         <textarea class="form-control" id="accessibleCondition" rows="2"></textarea>
                                     </div>
                                     <div class="col-md-6">
@@ -674,17 +752,21 @@
                     </div>
                     <div>
                         <button type="button" class="btn btn-sm btn-outline-light me-1"
-                            onclick="exportData('dictionary', 'csv')"><i class="bi bi-download"></i> CSV</button>
+                            onclick="exportData('dictionary', 'csv')"><i class="bi bi-download"></i>
+                            CSV</button>
                         <button type="button" class="btn btn-sm btn-outline-light me-2"
-                            onclick="exportData('dictionary', 'json')"><i class="bi bi-download"></i> JSON</button>
+                            onclick="exportData('dictionary', 'json')"><i class="bi bi-download"></i>
+                            JSON</button>
                         <input type="file" id="dictImportFile" accept=".csv,.json" class="d-none"
                             onchange="importDictionary()">
                         <button type="button" class="btn btn-sm btn-light text-primary fw-bold me-2"
                             onclick="document.getElementById('dictImportFile').click()">
                             <i class="bi bi-upload me-1"></i> Import
                         </button>
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold me-2"
+                            onclick="addCustomColumn('dictTable', 'text-nowrap')">+ เพิ่มฟิลด์ใหม่</button>
                         <button type="button" class="btn btn-sm btn-light text-success fw-bold" onclick="addDictRow()">+
-                            เพิ่มฟิลด์</button>
+                            เพิ่มฟิลด์ข้อมูล</button>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -692,19 +774,30 @@
                         <table class="table table-bordered mb-0" id="dictTable">
                             <thead class="table-light text-center small">
                                 <tr>
-                                    <th class="text-nowrap">ชื่อฟิลด์<br>(Field Name)</th>
-                                    <th class="text-nowrap">คำอธิบายฟิลด์<br>(Field Description)</th>
-                                    <th class="text-nowrap">ประเภทข้อมูล<br>(Data Type)</th>
-                                    <th class="text-nowrap">รูปแบบของข้อมูล<br>(Data Format)</th>
-                                    <th class="text-nowrap">เงื่อนไขการกรอก<br>(Data Validation)</th>
-                                    <th class="text-nowrap">แหล่งที่มา<br>(Data Source)</th>
-                                    <th class="text-nowrap">ข้อมูลส่วนบุคคล<br>(Has PII)</th>
-                                    <th class="text-nowrap bg-warning bg-opacity-10">
+                                    <th class="text-nowrap" data-key="variable">ชื่อฟิลด์<br>(Field Name)
+                                    </th>
+                                    <th class="text-nowrap" data-key="description">คำอธิบายฟิลด์<br>(Field
+                                        Description)
+                                    </th>
+                                    <th class="text-nowrap" data-key="type">ประเภทข้อมูล<br>(Data Type)</th>
+                                    <th class="text-nowrap" data-key="format">รูปแบบของข้อมูล<br>(Data
+                                        Format)</th>
+                                    <th class="text-nowrap" data-key="validation">เงื่อนไขการกรอก<br>(Data
+                                        Validation)
+                                    </th>
+                                    <th class="text-nowrap" data-key="source">แหล่งที่มา<br>(Data Source)
+                                    </th>
+                                    <th class="text-nowrap" data-key="hasPII">ข้อมูลส่วนบุคคล<br>(Has PII)
+                                    </th>
+                                    <th class="text-nowrap bg-warning bg-opacity-10" data-key="classification">
                                         ระดับชั้นความลับ<br>(Classification)</th>
-                                    <th class="text-nowrap">การเผยแพร่<br>(Dissemination)</th>
-                                    <th class="text-nowrap">ความยาวข้อมูล<br>(Field Length)</th>
-                                    <th class="text-nowrap">หมายเหตุ<br>(Remarks)</th>
-                                    <th></th>
+                                    <th class="text-nowrap" data-key="dissemination">
+                                        การเผยแพร่<br>(Dissemination)
+                                    </th>
+                                    <th class="text-nowrap" data-key="size">ความยาวข้อมูล<br>(Field Length)
+                                    </th>
+                                    <th class="text-nowrap" data-key="remarks">หมายเหตุ<br>(Remarks)</th>
+                                    <th class="text-center">ลบ</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -730,7 +823,8 @@
                         </div>
                         <div class="col-md-6">
                             <button type="button" class="btn btn-primary w-100 fw-bold py-2" onclick="saveData()">
-                                <i class="bi bi-cloud-upload-fill me-2"></i> บันทึกข้อมูลลงฐานข้อมูลกลาง (Save to
+                                <i class="bi bi-cloud-upload-fill me-2"></i> บันทึกข้อมูลลงฐานข้อมูลกลาง
+                                (Save to
                                 Repository)
                             </button>
                         </div>
@@ -749,7 +843,7 @@
 
     <footer class="text-center py-4 text-muted small mt-5 border-top">
         <div class="container">
-            Copyright &copy; 2026 Rachen Panichdee. All Rights Reserved.
+            Copyright &copy; 2026 Anthony Shane. All Rights Reserved.
         </div>
     </footer>
 
@@ -759,27 +853,27 @@
         let keywords = [];
 
         // Save Script URL to localStorage
-        function saveConfig() {
-            const url = document.getElementById('scriptUrl').value.trim();
-            if (url) {
-                localStorage.setItem('scriptUrl', url);
-                alert('✅ บันทึก URL สำเร็จ! (URL saved)');
-            } else {
-                alert('⚠️ กรุณากรอก URL ก่อน');
-            }
-        }
+        // Global variable to hold the background script URL defined by the ?id= parameter
+        window.currentScriptUrl = '';
 
-        // Load Script URL from localStorage or URL Parameters (Token/ID)
+        // Load Script URL from URL Parameters (Token/ID) without UI
         function loadConfig() {
-            // --- Predefined Shortcodes (Add more here as needed) ---
             const shortcodes = {
                 'dla': {
                     agency: 'กรมการปกครองส่วนท้องถิ่น กระทรวงมหาดไทย',
                     url: 'https://script.google.com/macros/s/AKfycbwdfCsonERY5XjkPUJypgGCOKW6NNKM5mnDUE0yB8bXv2X05g9anHVNxlYGdO0nV1MnuQ/exec'
                 },
+                'dla2': {
+                    agency: 'กรมการปกครองส่วนท้องถิ่น กระทรวงมหาดไทย',
+                    url: 'https://script.google.com/macros/s/AKfycbzKnB6GjUD9AjHf3KsULx7jtwYCj7DqxDTUDgP9U9I9zqq97TOPLp2y1OKUW6B63EaT/exec'
+                },
                 'diw': {
-                    agency: 'กรมโรงงานอุตสาหกรรม',
+                    agency: 'กรมโรงงานอุตสาหกรรม กระทรวงอุตสาหกรรม',
                     url: 'https://script.google.com/macros/s/AKfycbxv0FI96eLnQ5pVFX7rOB67k9rIMYh7C8ZiPFZp0hK9sAFHhvzNnSCCW8hWZ_lzgCXCOw/exec'
+                },
+                'diw2': {
+                    agency: 'กรมโรงงานอุตสาหกรรม กระทรวงอุตสาหกรรม',
+                    url: 'https://script.google.com/macros/s/AKfycbyWe7xf8ARJif7omiquFvDX71EKXpfItM-21gUHI49zNiFr4TYGFoz2eAfSseLLu3FO/exec'
                 }
             };
 
@@ -793,85 +887,182 @@
             if (shortcodeId && shortcodes[shortcodeId.toLowerCase()]) {
                 config = shortcodes[shortcodeId.toLowerCase()];
             }
-            // 2. Fallback to Token if no Shortcode
+            // 2. Or fallback to localStorage/session logic if token exists
             else if (token) {
-                try {
-                    // 1. Decode Base64 Token
-                    const decodedStr = decodeURIComponent(escape(atob(token)));
-                    config = JSON.parse(decodedStr); // Assign to the outer `config` variable
-                } catch (e) {
-                    console.error("Invalid token format", e);
-                    alert("⚠️ ลิงก์ไม่ถูกต้อง หรือ Token หมดอายุ กรุณาติดต่อผู้ดูแลระบบ");
-                }
+                // Future expansion: fetch config from token API
+                // For now, demo falls back to dla2 if token is invalid
+                config = shortcodes['dla2'];
+            }
+            // 3. Absolute Default Fallback (Lock to dla2 as requested by Admin)
+            else {
+                config = shortcodes['dla2'];
             }
 
-            // Apply the config if found (either from Shortcode or Token)
+            // Apply the config if found quietly in the background
             if (config) {
                 if (config.url) {
-                    localStorage.setItem('scriptUrl', config.url);
-                    document.getElementById('scriptUrl').value = config.url;
-                    document.querySelector('[data-bs-target="#settingsCollapse"]').classList.add('d-none');
+                    window.currentScriptUrl = config.url;
                 }
                 if (config.agency) {
                     const agencyInput = document.getElementById('submitterAgency');
-                    agencyInput.value = config.agency;
-                    agencyInput.readOnly = true;
-                    agencyInput.classList.add('bg-light');
-                }
-            } else {
-                // 2. Fallback to localStorage if no Token
-                const saved = localStorage.getItem('scriptUrl');
-                if (saved) {
-                    document.getElementById('scriptUrl').value = saved;
+                    if (agencyInput) {
+                        agencyInput.value = config.agency;
+                        agencyInput.readOnly = true;
+                        agencyInput.classList.add('bg-light');
+                    }
                 }
             }
         }
-
-        // --- Admin Link Generator System ---
-        function generateEncodedLink() {
-            const agency = document.getElementById('genAgency').value.trim();
-            const url = document.getElementById('genUrl').value.trim();
-
-            if (!agency || !url) {
-                alert("กรุณากรอกทั้งชื่อหน่วยงานและ URL");
-                return;
-            }
-
-            const dataObj = { agency: agency, url: url };
-            // JSON -> String -> Base64
-            const token = btoa(unescape(encodeURIComponent(JSON.stringify(dataObj))));
-
-            // Get current base URL without parameters
-            const baseUrl = window.location.href.split('?')[0];
-            const finalLink = `${baseUrl}?token=${token}`;
-
-            const resultInput = document.getElementById('genResult');
-            resultInput.value = finalLink;
-            resultInput.select();
-            document.execCommand("copy");
-            alert("✅ สร้างและคัดลอกลิงก์เรียบร้อยแล้ว!\nสามารถนำลิงก์นี้ส่งให้หน่วยงานได้เลย");
-        }
-
-        // Secret trick to show the Admin Link Generator: Double click on the Settings button
-        document.querySelector('[data-bs-target="#settingsCollapse"]').addEventListener('dblclick', function () {
-            const generator = document.getElementById('adminGenerator');
-            generator.classList.remove('d-none');
-            // Auto open settings card to show the generator
-            const collapseElement = document.getElementById('settingsCollapse');
-            const bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: true });
-            bsCollapse.show();
-        });
 
         document.addEventListener('DOMContentLoaded', () => {
             addDictRow();
             // addGlossaryRow();
             loadConfig();
+            loadEditData();
 
             // Keyword Enter Key
             document.getElementById('keywordsInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') { e.preventDefault(); addKeyword(); }
             });
         });
+
+        async function loadEditData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('editId');
+            if (!editId || !window.currentScriptUrl) return;
+
+            // Enforce Admin Password for Editing
+            if (sessionStorage.getItem('editAuthed_' + editId) !== 'true') {
+                const pwd = prompt("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
+                if (pwd !== "admin1234") {
+                    if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง!");
+                    window.location.href = "catalog.html"; // Redirect back to catalog
+                    return; // Cancel edit
+                }
+                sessionStorage.setItem('editAuthed_' + editId, 'true');
+            }
+
+            // Change UI to Edit Mode
+            const submitBtn = document.querySelector('button[onclick="saveData()"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-pencil-square me-2"></i> บันทึกการอัปเดตข้อมูล (Update Dataset)';
+                submitBtn.classList.replace('btn-primary', 'btn-warning');
+            }
+            window.currentEditId = editId;
+
+            try {
+                // Show loading overlay
+                const loadingHtml = '<div id="editLoading" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;"><div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div><h4 class="mt-3 text-primary fw-bold">กำลังโหลดข้อมูลเดิม...</h4></div>';
+                document.body.insertAdjacentHTML('beforeend', loadingHtml);
+
+                const response = await fetch(`${window.currentScriptUrl}?action=getDataset&datasetId=${editId}`);
+                const result = await response.json();
+
+                if (result.result === 'success' && result.data) {
+                    const data = result.data;
+                    processMetaImport(data, true); // Fill root form fields silently
+
+                    // Fill Glossary
+                    if (data.glossary && data.glossary.length > 0) {
+                        document.querySelector('#glossaryTable tbody').innerHTML = ''; // basic clear first row
+                        document.getElementById('emptyGlossaryMsg').classList.add('d-none');
+
+                        // Identify and add custom columns
+                        const standardGlossKeys = ['datasetid', 'submitteragency', 'domain', 'term', 'definition', 'source', 'คำศัพท์', 'ความหมาย', 'เจ้าของ'];
+                        const glossCustomKeys = new Set();
+                        data.glossary.forEach(item => {
+                            Object.keys(item).forEach(k => {
+                                if (!standardGlossKeys.includes(k.toLowerCase().trim())) {
+                                    glossCustomKeys.add(k);
+                                }
+                            });
+                        });
+                        glossCustomKeys.forEach(key => addCustomColumn('glossaryTable', '', key));
+
+                        data.glossary.forEach(item => {
+                            const normalizedItem = {};
+                            Object.keys(item).forEach(k => normalizedItem[k.toLowerCase().trim()] = item[k]);
+                            addGlossaryRow();
+                            const tr = document.querySelector('#glossaryTable tbody tr:last-child');
+                            tr.querySelector('.gloss-term').value = normalizedItem['term'] || normalizedItem['คำศัพท์'] || '';
+                            tr.querySelector('.gloss-def').value = normalizedItem['definition'] || normalizedItem['ความหมาย'] || '';
+                            tr.querySelector('.gloss-source').value = normalizedItem['source'] || normalizedItem['เจ้าของ'] || '';
+
+                            // Fill custom fields
+                            glossCustomKeys.forEach(key => {
+                                const headers = Array.from(document.querySelectorAll('#glossaryTable thead th'));
+                                const keyIndex = headers.findIndex(th => th.getAttribute('data-key') === key);
+                                if (keyIndex !== -1 && item[key] !== undefined) {
+                                    const td = tr.children[keyIndex];
+                                    if (td) {
+                                        const input = td.querySelector('input');
+                                        if (input) input.value = item[key];
+                                    }
+                                }
+                            });
+                        });
+                    }
+
+                    // Fill Dictionary
+                    if (data.dictionary && data.dictionary.length > 0) {
+                        document.querySelector('#dictTable tbody').innerHTML = '';
+                        document.getElementById('emptyDictMsg').classList.add('d-none');
+
+                        // Identify and add custom columns
+                        const standardDictKeys = ['datasetid', 'submitteragency', 'domain', 'variable', 'name', 'description', 'type', 'format', 'validation', 'source', 'size', 'remarks', 'haspii', 'classification', 'dissemination'];
+                        const dictCustomKeys = new Set();
+                        data.dictionary.forEach(item => {
+                            Object.keys(item).forEach(k => {
+                                if (!standardDictKeys.includes(k.toLowerCase().trim())) {
+                                    dictCustomKeys.add(k);
+                                }
+                            });
+                        });
+                        dictCustomKeys.forEach(key => addCustomColumn('dictTable', 'text-nowrap', key));
+
+                        data.dictionary.forEach(item => {
+                            const normalizedItem = {};
+                            Object.keys(item).forEach(k => normalizedItem[k.toLowerCase().trim()] = item[k]);
+                            addDictRow();
+                            const tr = document.querySelector('#dictTable tbody tr:last-child');
+                            tr.querySelector('.dict-var').value = normalizedItem['variable'] || normalizedItem['name'] || '';
+                            tr.querySelector('.dict-desc').value = normalizedItem['description'] || '';
+                            tr.querySelector('.dict-type').value = normalizedItem['type'] || 'String';
+                            tr.querySelector('.dict-format').value = normalizedItem['format'] || '';
+                            tr.querySelector('.dict-valid').value = normalizedItem['validation'] || '';
+                            tr.querySelector('.dict-source').value = normalizedItem['source'] || '';
+                            tr.querySelector('.dict-size').value = normalizedItem['size'] || '';
+                            tr.querySelector('.dict-rem').value = normalizedItem['remarks'] || '';
+                            tr.querySelector('.dict-pii').value = String(normalizedItem['haspii'] || 'No').toLowerCase().includes('yes') ? 'Yes' : 'No';
+                            tr.querySelector('.dict-class').value = normalizedItem['classification'] || 'Private';
+                            tr.querySelector('.dict-dissem').value = normalizedItem['dissemination'] || 'Internal';
+
+                            // Fill custom fields
+                            dictCustomKeys.forEach(key => {
+                                const headers = Array.from(document.querySelectorAll('#dictTable thead th'));
+                                const keyIndex = headers.findIndex(th => th.getAttribute('data-key') === key);
+                                if (keyIndex !== -1 && item[key] !== undefined) {
+                                    const td = tr.children[keyIndex];
+                                    if (td) {
+                                        const input = td.querySelector('input');
+                                        if (input) input.value = item[key];
+                                    }
+                                }
+                            });
+                        });
+                    }
+
+                } else {
+                    alert('ไม่พบข้อมูลชุดนี้ในระบบ (Dataset ID not found)');
+                }
+            } catch (err) {
+                console.error("Error loading edit data", err);
+                alert("เกิดข้อผิดพลาดในการโหลดข้อมูลเดิม: " + err.message);
+            } finally {
+                const loader = document.getElementById('editLoading');
+                if (loader) loader.remove();
+            }
+        }
 
         // Generic Toggle Function
         function toggleOther(selectId, inputId, triggerVal) {
@@ -912,15 +1103,66 @@
             document.getElementById('keywords').value = keywords.join(', ');
         }
 
+        // --- Custom Fields ---
+        function addCustomColumn(tableId, headerClass, predefinedName = null) {
+            const name = predefinedName || prompt("ชื่อฟิลด์ใหม่ที่ต้องการเพิ่ม (เช่น 'หน่วยงานย่อย', 'Ref Link'):");
+            if (!name) return;
+
+            const theadTr = document.querySelector(`#${tableId} thead tr`);
+            // Check if exists
+            const existingThs = Array.from(theadTr.querySelectorAll('th'));
+            if (existingThs.some(th => th.getAttribute('data-key') === name)) return;
+
+            const deleteTh = theadTr.lastElementChild;
+            const newTh = document.createElement('th');
+            newTh.setAttribute('data-key', name);
+            if (headerClass) newTh.className = headerClass;
+            newTh.textContent = name;
+            theadTr.insertBefore(newTh, deleteTh);
+
+            const tbodies = document.querySelectorAll(`#${tableId} tbody tr`);
+            tbodies.forEach(tr => {
+                const deleteTd = tr.lastElementChild;
+                const newTd = document.createElement('td');
+                newTd.innerHTML = `<input type="text" class="form-control form-control-sm">`;
+                tr.insertBefore(newTd, deleteTd);
+            });
+        }
+
+        function addCustomMetaField() {
+            const name = prompt("ชื่อข้อมูลส่วนเสริมที่ต้องการเพิ่ม (เช่น 'เวอร์ชัน', 'กลุ่มงาน'):");
+            if (!name) return;
+
+            const container = document.getElementById('metaFieldsContainer');
+            const col = document.createElement('div');
+            col.className = 'col-md-6 custom-meta-container mt-3';
+            col.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label mb-0 fw-bold text-primary">${name}</label>
+                    <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="this.closest('.custom-meta-container').remove()"><i class="bi bi-trash"></i> ลบ</button>
+                </div>
+                <input type="text" class="form-control custom-meta-field border-primary" data-key="${name}">
+            `;
+            container.appendChild(col);
+        }
+
         // --- Glossary ---
         function addGlossaryRow() {
             const tbody = document.querySelector('#glossaryTable tbody');
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="form-control form-control-sm gloss-term" placeholder="เช่น GDP (Gross Domestic Product)"></td>
-                <td><input type="text" class="form-control form-control-sm gloss-def" placeholder="เช่น ผลิตภัณฑ์มวลรวมในประเทศ..."></td>
-                <td><input type="text" class="form-control form-control-sm gloss-source" placeholder="เช่น สภาพัฒน์"></td>
-                <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeGlossaryRow(this)">×</button></td>`;
+            let html = `
+                <td><input type="text" class="form-control form-control-sm gloss-term" placeholder="เช่น GDP, ประชากรแฝง"></td>
+                <td><textarea class="form-control form-control-sm gloss-def" rows="1" placeholder="เช่น ผลิตภัณฑ์มวลรวมในประเทศ"></textarea></td>
+                <td><input type="text" class="form-control form-control-sm gloss-source" placeholder="เช่น กระทรวงคลัง, พจนานุกรม"></td>`;
+
+            const theadThs = document.querySelectorAll('#glossaryTable thead th');
+            const customCount = theadThs.length - 4; // 3 base + 1 delete
+            for (let i = 0; i < customCount; i++) {
+                html += `<td><input type="text" class="form-control form-control-sm" placeholder="กรอกข้อมูล..."></td>`;
+            }
+
+            html += `<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeGlossaryRow(this)">×</button></td>`;
+            tr.innerHTML = html;
             tbody.appendChild(tr);
             document.getElementById('emptyGlossaryMsg').classList.add('d-none');
         }
@@ -936,9 +1178,9 @@
         function addDictRow() {
             const tbody = document.querySelector('#dictTable tbody');
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="form-control form-control-sm dict-var" placeholder="เช่น cid"></td>
-                <td><textarea class="form-control form-control-sm dict-desc" rows="1" placeholder="เช่น เลขประจำตัวประชาชน"></textarea></td>
+            let html = `
+                <td><input type="text" class="form-control form-control-sm dict-var" placeholder="เช่น cid, firstname"></td>
+                <td><textarea class="form-control form-control-sm dict-desc" rows="1" placeholder="เช่น รหัสบัตรประชาชน"></textarea></td>
                 <td>
                     <select class="form-select form-select-sm dict-type">
                          <option value="String">String</option>
@@ -951,9 +1193,9 @@
                          <option value="Object">Object</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm dict-format" placeholder="13 digits"></td>
-                <td><input type="text" class="form-control form-control-sm dict-valid" placeholder="Not Null, Unique"></td>
-                <td><input type="text" class="form-control form-control-sm dict-source" placeholder="กรมการปกครอง"></td>
+                <td><input type="text" class="form-control form-control-sm dict-format" placeholder="เช่น yyyy-mm-dd"></td>
+                <td><input type="text" class="form-control form-control-sm dict-valid" placeholder="เช่น Not Null, >0"></td>
+                <td><input type="text" class="form-control form-control-sm dict-source" placeholder="เช่น ระบบ API, เจ้าหน้าที่กรอก"></td>
                 <td>
                     <select class="form-select form-select-sm dict-pii">
                         <option value="No">No</option>
@@ -962,11 +1204,11 @@
                 </td>
                 <td class="bg-warning bg-opacity-10">
                     <select class="form-select form-select-sm dict-class fw-bold text-dark">
-                        <option value="Open" class="text-success">เปิดเผย (Open)</option>
-                        <option value="Private" class="text-primary">เผยแพร่ภายใน (Private)</option>
-                        <option value="Confidential" class="text-warning">ลับ (Confidential)</option>
-                        <option value="Secret" class="text-danger">ลับมาก (Secret)</option>
-                        <option value="Top Secret" class="text-danger fw-bold">ลับที่สุด (Top Secret)</option>
+                        <option value="Open" class="text-success">เปิดเผย</option>
+                        <option value="Private" class="text-primary">เผยแพร่ภายใน</option>
+                        <option value="Confidential" class="text-warning">ลับ</option>
+                        <option value="Secret" class="text-danger">ลับมาก</option>
+                        <option value="Top Secret" class="text-danger fw-bold">ลับที่สุด</option>
                     </select>
                 </td>
                 <td>
@@ -975,9 +1217,17 @@
                         <option value="Internal">Internal</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm dict-size" placeholder="เช่น 255"></td>
-                <td><textarea class="form-control form-control-sm dict-rem" rows="1" placeholder="หมายเหตุเพิ่มเติม"></textarea></td>
-                <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeDictRow(this)">×</button></td>`;
+                <td><input type="text" class="form-control form-control-sm dict-size" placeholder="เช่น 13, 255"></td>
+                <td><textarea class="form-control form-control-sm dict-rem" rows="1" placeholder="เช่น ดึงจากระบบมหาดไทย"></textarea></td>`;
+
+            const theadThs = document.querySelectorAll('#dictTable thead th');
+            const customCount = theadThs.length - 12; // 11 base + 1 delete
+            for (let i = 0; i < customCount; i++) {
+                html += `<td><input type="text" class="form-control form-control-sm" placeholder="กรอกข้อมูล..."></td>`;
+            }
+
+            html += `<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeDictRow(this)">×</button></td>`;
+            tr.innerHTML = html;
             tbody.appendChild(tr);
             document.getElementById('emptyDictMsg').classList.add('d-none');
         }
@@ -1046,77 +1296,289 @@
                 dictionary: []
             };
 
-            // Collect Glossary
-            document.querySelectorAll('#glossaryTable tbody tr').forEach(row => {
-                const term = row.querySelector('.gloss-term').value.trim();
-                if (term) data.glossary.push({
-                    term: term,
-                    definition: row.querySelector('.gloss-def').value.trim(),
-                    source: row.querySelector('.gloss-source').value.trim()
-                });
+            // Collect Custom Metadata Fields
+            document.querySelectorAll('.custom-meta-field').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (key) data[key] = el.value.trim();
             });
 
-            // Collect Dictionary
-            document.querySelectorAll('#dictTable tbody tr').forEach(row => {
-                const name = row.querySelector('.dict-var').value.trim();
-                if (name) data.dictionary.push({
-                    variable: name,
-                    description: row.querySelector('.dict-desc').value.trim(),
-                    type: row.querySelector('.dict-type').value,
-                    format: row.querySelector('.dict-format').value.trim(),
-                    validation: row.querySelector('.dict-valid').value.trim(),
-                    source: row.querySelector('.dict-source').value.trim(),
-                    hasPII: row.querySelector('.dict-pii').value,
-                    classification: row.querySelector('.dict-class').value,
-                    dissemination: row.querySelector('.dict-dissem').value,
-                    size: row.querySelector('.dict-size').value.trim(),
-                    remarks: row.querySelector('.dict-rem').value.trim()
+            // Collect Glossary (v2 Dynamic)
+            document.querySelectorAll('#glossaryTable tbody tr').forEach(row => {
+                const item = {};
+                const headers = document.querySelectorAll('#glossaryTable thead th');
+                const cells = row.querySelectorAll('td');
+                headers.forEach((th, index) => {
+                    const key = th.getAttribute('data-key');
+                    if (key) {
+                        const input = cells[index].querySelector('input, select, textarea');
+                        if (input && input.value) item[key] = input.value.trim();
+                    }
                 });
+                if (item.term) data.glossary.push(item);
+            });
+
+            // Collect Dictionary (v2 Dynamic)
+            document.querySelectorAll('#dictTable tbody tr').forEach(row => {
+                const item = {};
+                const headers = document.querySelectorAll('#dictTable thead th');
+                const cells = row.querySelectorAll('td');
+                headers.forEach((th, index) => {
+                    const key = th.getAttribute('data-key');
+                    if (key) {
+                        const input = cells[index].querySelector('input, select, textarea');
+                        if (input && input.value) item[key] = input.value.trim();
+                    }
+                });
+                if (item.variable) data.dictionary.push(item);
             });
 
             return data;
         }
 
+        // --- Helper Function for Data Binding ---
+        const stdMap = {
+            submitteragency: 'submitterAgency', agency: 'submitterAgency',
+            domain: 'businessDomain', businessdomain: 'businessDomain',
+            title: 'title', name: 'title',
+            description: 'description', desc: 'description',
+            objective: 'objective',
+            keywords: 'keywordsInput', keyword: 'keywordsInput',
+            topiccategory: 'topicCategory', topic: 'topicCategory',
+            govdatacategory: 'govDataCategory', govcat: 'govDataCategory',
+            classification: 'classification', class: 'classification',
+            datasettype: 'datasetType', type: 'datasetType',
+            functionalrole: 'functionalRole', role: 'functionalRole',
+            datastructure: 'dataStructure', structure: 'dataStructure',
+            license: 'license',
+            owner: 'owner',
+            maintainer: 'maintainer',
+            email: 'email', contact: 'email',
+            source: 'source',
+            fileformat: 'fileFormat', format: 'fileFormat',
+            updatefrequnit: 'updateFreqUnit', freq: 'updateFreqUnit',
+            updatefreqvalue: 'updateFreqValue', freqval: 'updateFreqValue',
+            geocoverage: 'geoCoverage', geo: 'geoCoverage',
+            accessurl: 'accessUrl', url: 'accessUrl',
+            createddate: 'createdDate', created: 'createdDate',
+            lastmodifieddate: 'lastModifiedDate', modified: 'lastModifiedDate',
+            accessiblecondition: 'accessibleCondition', condition: 'accessibleCondition',
+            sponsor: 'sponsor',
+            unitofanalysis: 'unitOfAnalysis', unit: 'unitOfAnalysis',
+            language: 'language', lang: 'language'
+        };
+
+        function processMetaImport(dataObj, silent = false) {
+            if (!dataObj || typeof dataObj !== 'object') return;
+
+            const unknownKeys = new Set();
+
+            Object.keys(dataObj).forEach(key => {
+                const normalizedKey = key.toLowerCase().trim();
+                const targetId = stdMap[normalizedKey];
+
+                if (targetId) {
+                    const el = document.getElementById(targetId);
+                    if (el) {
+                        if (targetId === 'keywordsInput') {
+                            // Handle keywords specifically
+                            const rawKws = dataObj[key];
+                            if (rawKws) {
+                                const kwArray = String(rawKws).split(',').map(k => k.trim()).filter(k => k);
+                                kwArray.forEach(k => {
+                                    if (!keywords.includes(k)) keywords.push(k);
+                                });
+                                renderKeywords();
+                            }
+                        } else {
+                            // Handle standard inputs/selects
+                            el.value = dataObj[key];
+
+                            // Aggressive text-matching for dropdowns to avoid validation failures
+                            if (el.tagName === 'SELECT' && !el.value) {
+                                const valStr = String(dataObj[key]).toLowerCase().trim();
+                                const options = Array.from(el.options);
+                                let matched = false;
+
+                                // Match by text (e.g. "สังคม (Social Focus)") or value
+                                for (let opt of options) {
+                                    if (opt.value && (opt.text.toLowerCase().includes(valStr) || valStr.includes(opt.value.toLowerCase()))) {
+                                        el.value = opt.value;
+                                        matched = true;
+                                        break;
+                                    }
+                                }
+
+                                // Fallback to "Other" option if still unmatched
+                                if (!matched) {
+                                    const otherOpt = options.find(o => o.value.toLowerCase().includes('other'));
+                                    if (otherOpt) {
+                                        el.value = otherOpt.value;
+                                        // Handle dynamically showing the "Other" input box
+                                        const otherInput = document.getElementById(el.id + 'Other');
+                                        if (otherInput) {
+                                            otherInput.value = dataObj[key];
+                                            otherInput.classList.remove('d-none');
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Trigger change event logic for 'Other' fields if applicable
+                            if (['businessDomain', 'topicCategory', 'datasetType', 'license', 'updateFreqUnit'].includes(targetId)) {
+                                el.dispatchEvent(new Event('change'));
+                            }
+                        }
+                    }
+                } else {
+                    // Key isn't in standard map, treat as custom field
+                    if (key && !key.toLowerCase().includes('dictionary') && !key.toLowerCase().includes('glossary')) {
+                        unknownKeys.add(key.trim());
+
+                        // Check if this custom field already exists on screen
+                        let exists = false;
+                        document.querySelectorAll('.custom-meta-field').forEach(field => {
+                            if (field.getAttribute('data-key') === key || field.getAttribute('data-key').toLowerCase() === normalizedKey) exists = true;
+                        });
+
+                        // If not, auto-create it using the container template
+                        if (!exists) {
+                            const container = document.getElementById('metaFieldsContainer');
+                            const col = document.createElement('div');
+                            col.className = 'col-md-6 custom-meta-container mt-3';
+                            col.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label mb-0 fw-bold text-primary">${key}</label>
+                                    <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="this.closest('.custom-meta-container').remove()"><i class="bi bi-trash"></i> ลบ</button>
+                                </div>
+                                <input type="text" class="form-control custom-meta-field border-primary" data-key="${key}" value="${dataObj[key]}">
+                            `;
+                            container.appendChild(col);
+                        } else {
+                            // Populate the existing custom field
+                            document.querySelectorAll('.custom-meta-field').forEach(field => {
+                                if (field.getAttribute('data-key') === key || field.getAttribute('data-key').toLowerCase() === normalizedKey) {
+                                    field.value = dataObj[key];
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
+            if (!silent) {
+                alert(`✅ Import Metadata สำเร็จ!\nพร้อมเพิ่มคอลัมน์ใหม่: ${unknownKeys.size > 0 ? Array.from(unknownKeys).join(', ') : 'ไม่มี'}`);
+            }
+        }
+
         // --- Bulk Import ---
-        function importDictionary() {
-            const fileInput = document.getElementById('dictImportFile');
+        function importMetadata() {
+            const fileInput = document.getElementById('metaImportFile');
             const file = fileInput.files[0];
             if (!file) return;
 
-            // Helper: map one data row object into a table row
-            function fillDictRow(tr, item) {
-                tr.querySelector('.dict-var').value = item.variable || item.name || item.field || '';
-                tr.querySelector('.dict-desc').value = item.description || item.desc || '';
-                // Match data type to select options (case-insensitive)
-                const typeMap = {
-                    string: 'String', integer: 'Integer', int: 'Integer', float: 'Float',
-                    date: 'Date', datetime: 'Datetime', boolean: 'Boolean', bool: 'Boolean',
-                    binary: 'Binary', object: 'Object'
-                };
-                const rawType = (item.type || '').toLowerCase();
-                tr.querySelector('.dict-type').value = typeMap[rawType] || 'String';
-                tr.querySelector('.dict-format').value = item.format || '';
-                tr.querySelector('.dict-valid').value = item.validation || item.valid || '';
-                tr.querySelector('.dict-source').value = item.source || '';
-                const rawPii = (item.hasPII || item.pii || item.pdpa || 'no').toLowerCase();
-                tr.querySelector('.dict-pii').value = rawPii.includes('yes') ? 'Yes' : 'No';
-                const rawClass = item.classification || item.class || 'Open';
-                tr.querySelector('.dict-class').value = rawClass;
-                const rawDissem = item.dissemination || item.dissem || 'Public';
-                tr.querySelector('.dict-dissem').value = rawDissem;
-                tr.querySelector('.dict-size').value = item.size || item.length || '';
-                tr.querySelector('.dict-rem').value = item.remarks || item.remark || '';
-            }
-
-            // Always clear existing rows before loading
-            function clearAndLoad(rows) {
-                document.querySelector('#dictTable tbody').innerHTML = '';
-                document.getElementById('emptyDictMsg').classList.add('d-none');
-                rows.forEach(item => {
-                    addDictRow();
-                    const tr = document.querySelector('#dictTable tbody tr:last-child');
-                    fillDictRow(tr, item);
+            if (file.name.endsWith('.csv')) {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function (results) {
+                        if (results.data && results.data.length > 0) {
+                            // Metadata from CSV is expected to be a single row
+                            processMetaImport(results.data[0]);
+                        } else {
+                            alert('⚠️ ไม่พบข้อมูลในไฟล์ CSV');
+                        }
+                    },
+                    error: function (err) {
+                        alert('❌ อ่านไฟล์ CSV ไม่สำเร็จ: ' + err.message);
+                    }
                 });
+            } else if (file.name.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        // Try to find the metadata object (could be the root object, or inside an array)
+                        let payload = jsonData;
+                        if (Array.isArray(jsonData) && jsonData.length > 0) {
+                            payload = jsonData[0]; // If array, assume first object is the metadata
+                        }
+                        processMetaImport(payload);
+                    } catch (ex) {
+                        alert('❌ JSON ไม่ถูกต้อง: ' + ex.message);
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                alert('⚠️ รองรับเฉพาะไฟล์ .csv และ .json เท่านั้น');
+            }
+            fileInput.value = ''; // Reset file input
+        }
+
+        function importGlossary() {
+            const fileInput = document.getElementById('glossaryImportFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            function processImportedData(rows) {
+                if (!Array.isArray(rows) || rows.length === 0) return;
+
+                // 1. Detect unknown columns across all rows
+                const stdKeys = ['term', 'คำศัพท์', 'word', 'definition', 'ความหมาย', 'desc', 'source', 'เจ้าของ', 'แหล่งอ้างอิง'];
+                const unknownKeys = new Set();
+                rows.forEach(rowObj => {
+                    Object.keys(rowObj).forEach(k => {
+                        if (k && !stdKeys.includes(k.toLowerCase().trim())) {
+                            unknownKeys.add(k.trim());
+                        }
+                    });
+                });
+
+                // 2. Create custom columns in UI for any unknown keys that don't exist yet
+                const existingHeaders = Array.from(document.querySelectorAll('#glossaryTable thead th')).map(th => th.getAttribute('data-key'));
+                unknownKeys.forEach(newKey => {
+                    if (!existingHeaders.includes(newKey)) {
+                        const tableId = 'glossaryTable';
+                        const theadTr = document.querySelector(`#${tableId} thead tr`);
+                        const deleteTh = theadTr.lastElementChild;
+                        const newTh = document.createElement('th');
+                        newTh.setAttribute('data-key', newKey);
+                        newTh.className = 'text-primary';
+                        newTh.textContent = newKey;
+                        theadTr.insertBefore(newTh, deleteTh);
+                    }
+                });
+
+                document.querySelector('#glossaryTable tbody').innerHTML = '';
+                document.getElementById('emptyGlossaryMsg').classList.add('d-none');
+
+                rows.forEach(item => {
+                    // Create a lowercase map for robust standard-field looking up
+                    const normalizedItem = {};
+                    Object.keys(item).forEach(k => normalizedItem[k.toLowerCase().trim()] = item[k]);
+
+                    addGlossaryRow();
+                    const tr = document.querySelector('#glossaryTable tbody tr:last-child');
+
+                    // Fill Standard Fields
+                    tr.querySelector('.gloss-term').value = normalizedItem['term'] || normalizedItem['คำศัพท์'] || normalizedItem['word'] || '';
+                    tr.querySelector('.gloss-def').value = normalizedItem['definition'] || normalizedItem['ความหมาย'] || normalizedItem['desc'] || '';
+                    tr.querySelector('.gloss-source').value = normalizedItem['source'] || normalizedItem['เจ้าของ'] || normalizedItem['แหล่งอ้างอิง'] || '';
+
+                    // Fill Custom Fields
+                    const headers = document.querySelectorAll('#glossaryTable thead th');
+                    const cells = tr.querySelectorAll('td');
+                    headers.forEach((th, index) => {
+                        const key = th.getAttribute('data-key');
+                        if (key && !stdKeys.includes(key.toLowerCase().trim())) {
+                            const input = cells[index].querySelector('input, select, textarea');
+                            const originalValue = item[key] !== undefined ? item[key] : normalizedItem[key.toLowerCase().trim()];
+                            if (input && originalValue !== undefined) {
+                                input.value = originalValue;
+                            }
+                        }
+                    });
+                });
+
                 alert(`✅ Import สำเร็จ! ${rows.length} รายการ`);
             }
 
@@ -1124,10 +1586,9 @@
                 Papa.parse(file, {
                     header: true,
                     skipEmptyLines: true,
-                    transformHeader: h => h.trim().toLowerCase(),
                     complete: function (results) {
                         if (results.data && results.data.length > 0) {
-                            clearAndLoad(results.data);
+                            processImportedData(results.data);
                         } else {
                             alert('⚠️ ไม่พบข้อมูลในไฟล์ CSV');
                         }
@@ -1142,7 +1603,144 @@
                     try {
                         const jsonData = JSON.parse(e.target.result);
                         if (Array.isArray(jsonData) && jsonData.length > 0) {
-                            clearAndLoad(jsonData);
+                            processImportedData(jsonData);
+                        } else {
+                            alert('⚠️ JSON ต้องเป็น Array และมีข้อมูลอย่างน้อย 1 รายการ');
+                        }
+                    } catch (ex) {
+                        alert('❌ JSON ไม่ถูกต้อง: ' + ex.message);
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                alert('⚠️ รองรับเฉพาะไฟล์ .csv และ .json เท่านั้น');
+            }
+            fileInput.value = ''; // Reset file input
+        }
+
+        function importDictionary() {
+            const fileInput = document.getElementById('dictImportFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Define standard keys to ignore when checking for "unknown/new" columns
+            const stdKeys = ['variable', 'name', 'field', 'description', 'desc', 'type', 'format',
+                'validation', 'valid', 'source', 'haspii', 'pii', 'pdpa',
+                'classification', 'class', 'dissemination', 'dissem', 'size', 'length', 'remarks', 'remark'];
+
+            function processImportedData(rows) {
+                if (!Array.isArray(rows) || rows.length === 0) return;
+
+                // 1. Detect unknown columns across all rows
+                const unknownKeys = new Set();
+                rows.forEach(rowObj => {
+                    Object.keys(rowObj).forEach(k => {
+                        if (k && !stdKeys.includes(k.toLowerCase().trim())) {
+                            unknownKeys.add(k.trim());
+                        }
+                    });
+                });
+
+                // 2. Create custom columns in UI for any unknown keys that don't exist yet
+                const existingHeaders = Array.from(document.querySelectorAll('#dictTable thead th')).map(th => th.getAttribute('data-key'));
+                unknownKeys.forEach(newKey => {
+                    if (!existingHeaders.includes(newKey)) {
+                        const tableId = 'dictTable';
+                        const theadTr = document.querySelector(`#${tableId} thead tr`);
+                        const deleteTh = theadTr.lastElementChild;
+                        const newTh = document.createElement('th');
+                        newTh.setAttribute('data-key', newKey);
+                        newTh.className = 'text-nowrap text-primary';
+                        newTh.textContent = newKey;
+                        theadTr.insertBefore(newTh, deleteTh);
+
+                        // Note: we don't need to add <td> to existing rows because we are about to clear the table anyway
+                    }
+                });
+
+                // 3. Clear and Load Rows
+                document.querySelector('#dictTable tbody').innerHTML = '';
+                document.getElementById('emptyDictMsg').classList.add('d-none');
+
+                rows.forEach(item => {
+                    // Create a lowercase map for robust standard-field looking up
+                    const normalizedItem = {};
+                    Object.keys(item).forEach(k => normalizedItem[k.toLowerCase().trim()] = item[k]);
+
+                    addDictRow(); // Adds a row with all current headers (including the newly added custom ones)
+                    const tr = document.querySelector('#dictTable tbody tr:last-child');
+
+                    // Fill Standard Fields
+                    tr.querySelector('.dict-var').value = normalizedItem['variable'] || normalizedItem['name'] || normalizedItem['field'] || normalizedItem['sys_id'] || '';
+                    tr.querySelector('.dict-desc').value = normalizedItem['description'] || normalizedItem['desc'] || '';
+
+                    const typeMap = {
+                        string: 'String', integer: 'Integer', int: 'Integer', float: 'Float',
+                        date: 'Date', datetime: 'Datetime', boolean: 'Boolean', bool: 'Boolean',
+                        binary: 'Binary', object: 'Object'
+                    };
+                    const rawType = (normalizedItem['type'] || '').toLowerCase();
+                    tr.querySelector('.dict-type').value = typeMap[rawType] || 'String';
+                    tr.querySelector('.dict-format').value = normalizedItem['format'] || '';
+                    tr.querySelector('.dict-valid').value = normalizedItem['validation'] || normalizedItem['valid'] || '';
+                    tr.querySelector('.dict-source').value = normalizedItem['source'] || '';
+                    tr.querySelector('.dict-size').value = normalizedItem['size'] || normalizedItem['length'] || '';
+                    tr.querySelector('.dict-rem').value = normalizedItem['remarks'] || normalizedItem['remark'] || '';
+
+                    // 🛡️ SAFE DEFAULTS LOGIC
+                    let rawPii = (normalizedItem['haspii'] || normalizedItem['pii'] || normalizedItem['pdpa'] || '');
+                    if (!rawPii) rawPii = 'yes'; // SAFE DEFAULT: Assume Yes if empty
+                    tr.querySelector('.dict-pii').value = String(rawPii).toLowerCase().includes('no') ? 'No' : 'Yes';
+
+                    let rawClass = normalizedItem['classification'] || normalizedItem['class'] || '';
+                    if (!rawClass) rawClass = 'Private'; // SAFE DEFAULT: Private/Internal if empty
+                    tr.querySelector('.dict-class').value = rawClass;
+
+                    let rawDissem = normalizedItem['dissemination'] || normalizedItem['dissem'] || '';
+                    if (!rawDissem) rawDissem = 'Internal'; // SAFE DEFAULT: Internal if empty
+                    tr.querySelector('.dict-dissem').value = rawDissem;
+
+                    // Fill Custom Fields
+                    const headers = document.querySelectorAll('#dictTable thead th');
+                    const cells = tr.querySelectorAll('td');
+                    headers.forEach((th, index) => {
+                        const key = th.getAttribute('data-key');
+                        if (key && !stdKeys.includes(key.toLowerCase().trim())) {
+                            const input = cells[index].querySelector('input, select, textarea');
+                            // We look up via the original exact case key OR case-insensitive if strictly necessary
+                            const originalValue = item[key] !== undefined ? item[key] : normalizedItem[key.toLowerCase().trim()];
+                            if (input && originalValue !== undefined) {
+                                input.value = originalValue;
+                            }
+                        }
+                    });
+                });
+
+                alert(`✅ Import สำเร็จ! ${rows.length} รายการ\nพร้อมเพิ่มคอลัมน์ใหม่: ${unknownKeys.size > 0 ? Array.from(unknownKeys).join(', ') : 'ไม่มี'}`);
+            }
+
+            if (file.name.endsWith('.csv')) {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function (results) {
+                        if (results.data && results.data.length > 0) {
+                            processImportedData(results.data);
+                        } else {
+                            alert('⚠️ ไม่พบข้อมูลในไฟล์ CSV');
+                        }
+                    },
+                    error: function (err) {
+                        alert('❌ อ่านไฟล์ CSV ไม่สำเร็จ: ' + err.message);
+                    }
+                });
+            } else if (file.name.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        if (Array.isArray(jsonData) && jsonData.length > 0) {
+                            processImportedData(jsonData);
                         } else {
                             alert('⚠️ JSON ต้องเป็น Array และมีข้อมูลอย่างน้อย 1 รายการ');
                         }
@@ -1272,11 +1870,20 @@
 
         function saveToGoogleSheets(originalText, btn) {
             const data = getFormData();
-            // Read URL from localStorage (saved via settings panel)
-            const scriptUrl = localStorage.getItem('scriptUrl') || '';
+
+            if (window.currentEditId) {
+                data.action = 'update';
+                data.datasetId = window.currentEditId;
+            } else {
+                data.action = 'insert';
+            }
+
+            // --- DYNAMIC BACKGROUND CONFIGURATION ---
+            // Read URL loaded quietly from the ?id= parameter
+            const scriptUrl = window.currentScriptUrl;
 
             if (!scriptUrl || scriptUrl.trim() === '') {
-                alert('⚠️ ยังไม่ได้ตั้งค่า Google Apps Script URL\nกรุณากดปุ่ม "ตั้งค่า" ที่มุมบนขวา แล้ววาง URL และกด "บันทึก URL"');
+                alert('⚠️ Admin ยังไม่ได้ระบุ Google Apps Script URL ในระบบ');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 return;
@@ -1285,13 +1892,31 @@
             fetch(scriptUrl, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(data)
             }).then(() => {
-                // no-cors mode returns opaque response, assume success if no error thrown
-                alert('✅ บันทึกข้อมูลสำเร็จ! (Data saved to Google Sheets)');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+
+                if (window.currentEditId) {
+                    alert('✅ อัปเดตข้อมูลชุดเดิมสำเร็จเรียบร้อยแล้ว!\n(ระบบจะนำท่านกลับไปที่หน้า Catalog หรือท่านสามารถปิดหน้านี้ได้เลยครับ)');
+                    // Attempt to return to Catalog with the correct ID
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const id = urlParams.get('id');
+                    let redirectUrl = 'catalog.html';
+                    if (id) redirectUrl += `?id=${id}`;
+                    window.location.href = redirectUrl;
+                } else {
+                    alert('✅ บันทึกชุดข้อมูลใหม่สำเร็จ!\n(Data saved to Google Sheets)');
+                    // Clear the form after a successful insert
+                    document.getElementById('metadataForm').reset();
+                    keywords = [];
+                    renderKeywords();
+                    document.querySelector('#dictTable tbody').innerHTML = '';
+                    document.getElementById('emptyDictMsg').classList.remove('d-none');
+                    document.querySelector('#glossaryTable tbody').innerHTML = '';
+                    document.getElementById('emptyGlossaryMsg').classList.remove('d-none');
+                }
             }).catch(error => {
                 console.error('Google Sheets save error:', error);
                 alert('❌ เกิดข้อผิดพลาดในการบันทึก (Error saving to Google Sheets)');
@@ -1328,6 +1953,48 @@
                 window.location.href = 'splash.html';
             }
         }
+
+        function toggleFont() {
+            const body = document.body;
+            const btn = document.getElementById('fontToggleBtn');
+            body.classList.toggle('font-prompt');
+
+            if (body.classList.contains('font-prompt')) {
+                btn.innerHTML = '<i class="bi bi-fonts me-1"></i> กลับไปใช้ Sarabun';
+                localStorage.setItem('preferredFont', 'prompt');
+            } else {
+                btn.innerHTML = '<i class="bi bi-fonts me-1"></i> เปลี่ยนฟอนต์ (Prompt)';
+                localStorage.setItem('preferredFont', 'sarabun');
+            }
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const btn = document.getElementById('darkModeBtn');
+
+            if (html.getAttribute('data-bs-theme') === 'dark') {
+                html.setAttribute('data-bs-theme', 'light');
+                btn.innerHTML = '<i class="bi bi-moon-stars-fill me-1"></i> โหมดกลางคืน';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                btn.innerHTML = '<i class="bi bi-sun-fill me-1"></i> โหมดสว่าง';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Apply saved preference on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('preferredFont') === 'prompt') {
+                document.body.classList.add('font-prompt');
+                document.getElementById('fontToggleBtn').innerHTML = '<i class="bi bi-fonts me-1"></i> กลับไปใช้ Sarabun';
+            }
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                const dkBtn = document.getElementById('darkModeBtn');
+                if (dkBtn) dkBtn.innerHTML = '<i class="bi bi-sun-fill me-1"></i> โหมดสว่าง';
+            }
+        });
 
         function saveToGCS(originalText, btn) {
             const data = getFormData();

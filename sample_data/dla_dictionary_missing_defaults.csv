@@ -1,0 +1,10 @@
+Variable,Description,Type,Format,Validation,Source,Length,Remarks
+sys_id,รหัสประจำตัวประชาชน (ดัมมี่) ผู้มีสิทธิ์,String,13 หลัก,Must be numeric,ระบบเบี้ยยังชีพ,13,รหัสอ้างอิงภายใน
+prov_name,ชื่อจังหวัด,String,,,กรมการปกครอง,50,
+amp_name,ชื่ออำเภอ,String,,,กรมการปกครอง,50,
+tam_name,ชื่อตำบล,String,,,กรมการปกครอง,50,
+dla_name,ชื่อองค์กรปกครองส่วนท้องถิ่น,String,,,กรมส่งเสริมการปกครองท้องถิ่น,100,
+elderly_count,จำนวนผู้มีสิทธิ์รับเบี้ยยังชีพ,Integer,Numeric,,ระบบเบี้ยยังชีพ,,แสดงยอดรวมรายอปท.
+budget_amount,งบประมาณที่ได้รับการจัดสรร (บาท),Float,2 Decimal,> 0,สำนักงบประมาณ,,
+data_period,ปีงบประมาณ,String,YYYY,2020-2030,ระบบเบี้ยยังชีพ,4,
+status,สถานะการเบิกจ่าย,String,,[รอจ่าย|จ่ายแล้ว],ระบบเบี้ยยังชีพ,20,

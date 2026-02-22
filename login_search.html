@@ -231,16 +231,7 @@
                 <label class="form-label">Password (รหัสผ่าน)</label>
                 <input type="password" class="form-control" id="password" placeholder="Enter password" required>
             </div>
-            <div class="form-group" style="margin-bottom: 2rem;">
-                <label class="form-label" style="display: block; text-align: left; margin-bottom: 0.5rem;">System
-                    (ระบบที่ต้องการเข้าใช้งาน)</label>
-                <select class="form-control" id="targetSystem"
-                    style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                    <option value="index.html" style="color: black;">Metadata Registry (ระบบบันทึกข้อมูล)</option>
-                    <option value="catalog.html" style="color: black;">Data Catalog (ระบบสืบค้นข้อมูล)</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-login">Login (เข้าสู่ระบบ)</button>
+            <button type="submit" class="btn-login">Login (ระบบสืบค้นข้อมูล)</button>
             <div class="error-msg" id="errorMsg">Incorrect Username or Password</div>
         </form>
     </div>
@@ -264,49 +255,39 @@
             err.style.display = 'none';
 
             try {
-                // Remove Hardcoded logic and use Apps Script Backend
+                // Hardcoded Client-Side Login for GitHub Pages
+                // Make username lowercase and trim spaces for mobile keyboards
                 const usernameInput = usr.trim().toLowerCase();
                 const passwordInput = pwd.trim();
 
-                // Central Authentication API (using dla2 endpoint as the auth server)
-                const AUTH_URL = 'https://script.google.com/macros/s/AKfycbzKnB6GjUD9AjHf3KsULx7jtwYCj7DqxDTUDgP9U9I9zqq97TOPLp2y1OKUW6B63EaT/exec';
+                // Allow specific passwords for the admin user
+                const validPasswords = ['admin@123', 'dla123', 'diw123', 'diw2_123'];
 
-                const response = await fetch(AUTH_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                    },
-                    body: JSON.stringify({
-                        action: 'login',
-                        username: usernameInput,
-                        password: passwordInput
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.result === 'success') {
+                if (usernameInput === 'admin' && validPasswords.includes(passwordInput)) {
                     // Success
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('username', 'admin');
 
-                    // Map password to specific agency shortcode via query param
+                    // Map password to specific agency shortcode
                     let queryParams = window.location.search;
-                    if (data.queryParams) {
-                        queryParams = data.queryParams;
+                    if (passwordInput === 'dla123') {
+                        queryParams = '?id=dla2';
+                    } else if (passwordInput === 'diw123') {
+                        queryParams = '?id=diw';
+                    } else if (passwordInput === 'diw2_123') {
+                        queryParams = '?id=diw2';
                     }
 
-                    // Get selected destination system
-                    const targetPage = document.getElementById('targetSystem').value;
+                    // Hardcode target page
+                    const targetPage = 'catalog.html';
 
                     // Small delay for UX
                     setTimeout(() => {
                         window.location.href = targetPage + queryParams;
                     }, 500);
                 } else {
-                    throw new Error(data.message || 'Auth Failed');
+                    throw new Error('Auth Failed');
                 }
-
             } catch (error) {
                 console.error(error);
                 // Reset Button
