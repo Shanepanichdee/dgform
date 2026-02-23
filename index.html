@@ -365,9 +365,8 @@
                             <input type="text" class="form-control fw-bold" id="submitterAgency"
                                 placeholder="ระบุชื่อหน่วยงานที่กรอกข้อมูล เช่น กรมการปกครอง กระทรวงมหาดไทย" required>
                             <small class="text-muted"><i
-                                    class="bi bi-lock-fill text-secondary me-1"></i>แอดมินของระบบจะเป็นผู้เแบ่งปัน
-                                URL
-                                ให้แต่ละหน่วยงาน — ผู้กรอกไม่สามารถเข้าถึง Google Sheet ได้โดยตรง</small>
+                                    class="bi bi-lock-fill text-secondary me-1"></i>แอดมินของระบบจะเป็นผู้แบ่งปัน URL
+                                ให้แต่ละหน่วยงาน</small>
                         </div>
                     </div>
                 </div>
@@ -384,19 +383,31 @@
                         <div class="col-md-9">
                             <select class="form-select form-select-lg border-primary" id="businessDomain" required
                                 onchange="toggleDomainOther()">
-                                <option value="" selected disabled>-- เลือกโดเมนธุรกิจ (Select Business
-                                    Domain) --
+                                <option value="" selected disabled>-- เลือกโดเมนธุรกิจ (Select Business Domain) --
                                 </option>
-                                <option value="Citizen">1. ประชาชน (Citizen)</option>
-                                <option value="CivilServant">2. ข้าราชการ/เจ้าหน้าที่รัฐ (Civil Servant)
+                                <option value="Agriculture">การเกษตร (Agriculture)</option>
+                                <option value="Industry">อุตสาหกรรม (Industry)</option>
+                                <option value="Economy">เศรษฐกิจ การคลัง และงบประมาณ (Economy and Finance)</option>
+                                <option value="Commerce">พาณิชย์ และการบริการ (Commerce and Services)</option>
+                                <option value="TourismSports">การท่องเที่ยวและกีฬา (Tourism and Sports)</option>
+                                <option value="Education">การศึกษา (Education)</option>
+                                <option value="Energy">พลังงาน (Energy)</option>
+                                <option value="Environment">สิ่งแวดล้อมและทรัพยากรธรรมชาติ (Environment and Natural
+                                    Resources)</option>
+                                <option value="Health">สาธารณสุขและสุขภาพ (Health)</option>
+                                <option value="SecurityLaw">ความมั่นคงและกฎหมาย (Security and Law)</option>
+                                <option value="Society">สังคมและสวัสดิการ (Society and Welfare)</option>
+                                <option value="ScienceTech">วิทยาศาสตร์ เทคโนโลยี และดิจิทัล (Science and Technology)
                                 </option>
-                                <option value="BudgetFinance">3. งบประมาณและการคลัง (Budget & Finance)
+                                <option value="Transport">การคมนาคมและโลจิสติกส์ (Transport and Logistics)</option>
+                                <option value="Population">ประชากรและเคหะ (Population and Housing)</option>
+                                <option value="CultureReligion">ศาสนา ศิลปะ และวัฒนธรรม (Culture and Religion)</option>
+                                <option value="Infrastructure">การพัฒนาโครงสร้างพื้นฐาน (Infrastructure Development)
                                 </option>
-                                <option value="Procurement">4. การจัดซื้อจัดจ้าง (Procurement)</option>
-                                <option value="PublicService">5. การให้บริการภาครัฐ (Public Service)
-                                </option>
-                                <option value="Organization">6. องค์กรและโครงสร้าง (Organization)</option>
-                                <option value="Other">7. อื่น ๆ โปรดระบุ (Other)</option>
+                                <option value="ForeignAffairs">การต่างประเทศ (Foreign Affairs)</option>
+                                <option value="Labor">แรงงาน (Labor)</option>
+                                <option value="PublicAdmin">การบริหารจัดการภาครัฐ (Public Administration)</option>
+                                <option value="Other">อื่นๆ (Other)</option>
                             </select>
                             <input type="text" class="form-control form-control-lg mt-2 d-none" id="businessDomainOther"
                                 placeholder="ระบุโดเมนธุรกิจอื่นๆ (โปรดระบุ)">
@@ -1942,8 +1953,16 @@
                     window.location.href = redirectUrl;
                 } else {
                     alert('✅ บันทึกชุดข้อมูลใหม่สำเร็จ!\n(Data saved to Google Sheets)');
-                    // Clear the form after a successful insert
+                    // Prevent locked agency from wiping on reset
+                    const currentAgency = document.getElementById('submitterAgency').value;
+                    const isReadOnly = document.getElementById('submitterAgency').readOnly;
+
                     document.getElementById('metadataForm').reset();
+
+                    if (isReadOnly) {
+                        document.getElementById('submitterAgency').value = currentAgency;
+                    }
+
                     keywords = [];
                     renderKeywords();
                     document.querySelector('#dictTable tbody').innerHTML = '';
