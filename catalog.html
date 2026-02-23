@@ -394,9 +394,39 @@
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const domain = document.getElementById('domainFilter').value;
 
+            const domainMap = {
+                'Agriculture': ['agriculture', 'เกษตร'],
+                'Industry': ['industry', 'อุตสาหกรรม'],
+                'Economy': ['economy', 'เศรษฐกิจ', 'การคลัง'],
+                'Commerce': ['commerce', 'พาณิชย์', 'บริการ'],
+                'TourismSports': ['tourism', 'tourismsports', 'ท่องเที่ยว', 'กีฬา'],
+                'Education': ['education', 'ศึกษา'],
+                'Energy': ['energy', 'พลังงาน'],
+                'Environment': ['environment', 'สิ่งแวดล้อม', 'ทรัพยากร'],
+                'Health': ['health', 'สาธารณสุข', 'สุขภาพ'],
+                'SecurityLaw': ['security', 'securitylaw', 'มั่นคง', 'กฎหมาย'],
+                'Society': ['society', 'สังคม', 'สวัสดิการ'],
+                'ScienceTech': ['science', 'sciencetech', 'วิทยาศาสตร์', 'เทคโนโลยี', 'ดิจิทัล'],
+                'Transport': ['transport', 'คมนาคม', 'โลจิสติกส์'],
+                'Population': ['population', 'ประชากร', 'เคหะ'],
+                'CultureReligion': ['culture', 'culturereligion', 'ศาสนา', 'ศิลปะ', 'วัฒนธรรม'],
+                'Infrastructure': ['infrastructure', 'โครงสร้างพื้นฐาน'],
+                'ForeignAffairs': ['foreign', 'foreignaffairs', 'ต่างประเทศ'],
+                'Labor': ['labor', 'แรงงาน'],
+                'PublicAdmin': ['admin', 'publicadmin', 'บริหารจัดการ', 'ภาครัฐ'],
+                'Other': ['other', 'อื่น']
+            };
+
             const filtered = allDatasets.filter(item => {
-                // Domain Match
-                const matchDomain = (domain === 'all') || ((item.domain || "") === domain);
+                // Domain Match (Robust mapping check)
+                let matchDomain = false;
+                if (domain === 'all') {
+                    matchDomain = true;
+                } else {
+                    const itemDomain = (item.domain || "").toLowerCase();
+                    const filterKeywords = domainMap[domain] || [domain.toLowerCase()];
+                    matchDomain = filterKeywords.some(kw => itemDomain.includes(kw));
+                }
 
                 // Advanced Free Text Match (Deep Search across all properties)
                 // We combine all values of the object into a single string for robust searching
