@@ -468,13 +468,41 @@
                 const lockIcon = isPrivate ? 'bi-shield-lock-fill text-danger' : 'bi-shield-check text-success';
                 const classLabel = item.classification || 'Private';
 
+                // Display Domain Mapping
+                const displayDomainMap = {
+                    'Agriculture': 'การเกษตร (Agriculture)',
+                    'Industry': 'อุตสาหกรรม (Industry)',
+                    'Economy': 'เศรษฐกิจ การคลังฯ',
+                    'Commerce': 'พาณิชย์ และการบริการ',
+                    'TourismSports': 'การท่องเที่ยวและกีฬา',
+                    'Education': 'การศึกษา (Education)',
+                    'Energy': 'พลังงาน (Energy)',
+                    'Environment': 'สิ่งแวดล้อมฯ',
+                    'Health': 'สาธารณสุขและสุขภาพ',
+                    'SecurityLaw': 'ความมั่นคงและกฎหมาย',
+                    'Society': 'สังคมและสวัสดิการ',
+                    'ScienceTech': 'วิทยาศาสตร์และดิจิทัล',
+                    'Transport': 'การคมนาคมและโลจิสติกส์',
+                    'Population': 'ประชากรและเคหะ',
+                    'CultureReligion': 'ศาสนา ศิลปะ และวัฒนธรรม',
+                    'Infrastructure': 'การพัฒนาโครงสร้างพื้นฐาน',
+                    'ForeignAffairs': 'การต่างประเทศ',
+                    'Labor': 'แรงงาน (Labor)',
+                    'PublicAdmin': 'การบริหารจัดการภาครัฐ',
+                    'Other': 'อื่นๆ (Other)'
+                };
+
+                // Fallback to original value if it's already Thai or doesn't match the map
+                const rawDomain = item.domain || 'ไม่ระบุ';
+                const displayDomain = displayDomainMap[rawDomain] || rawDomain;
+
                 const card = document.createElement('div');
                 card.className = 'col-lg-4 col-md-6';
                 card.innerHTML = `
                     <div class="card dataset-card h-100 p-2">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${item.domain || 'ไม่ระบุ'}</span>
+                                <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${displayDomain}</span>
                                 <span class="badge bg-light text-dark border"><i class="bi ${lockIcon} me-1"></i> ${classLabel}</span>
                             </div>
                             <h5 class="card-title fw-bold text-primary mb-1 mt-2 line-clamp-2" title="${item.title || 'Untitled'}">${item.title || '<span class="text-danger fst-italic">Untitled Dataset</span>'}</h5>
