@@ -420,15 +420,23 @@
             const filtered = allDatasets.filter(item => {
                 const allTextContent = Object.values(item).map(v => String(v || '')).join(' ').toLowerCase();
 
-                // Domain Match (Robust mapping check across possible schema keys)
+                // Domain Match (Robust mapping check across possible schema keys and legacy fields)
                 let matchDomain = false;
                 if (domain === 'all') {
                     matchDomain = true;
                 } else {
-                    // Check all possible keys where domain might have been saved in Google Sheets history
-                    let rawItemDomain = String(item.domain || item.businessDomain || item.businessdomain || item['Business Domain'] || "").toLowerCase();
+                    // Check all possible keys where domain might have been saved in Google Sheets history, 
+                    // including topicCategory and keywords to catch legacy data categorization.
+                    let rawItemDomain = String(
+                        (item.domain || "") + " " +
+                        (item.businessDomain || "") + " " +
+                        (item.businessdomain || "") + " " +
+                        (item['Business Domain'] || "") + " " +
+                        (item.topicCategory || "") + " " +
+                        (item.keywords || "")
+                    ).toLowerCase();
 
-                    // If no explicit domain column was found in the sheet, fall back to searching the entire record text
+                    // If absolutely nothing is found in domain/category columns, search the entire record
                     if (!rawItemDomain.trim()) rawItemDomain = allTextContent;
 
                     const filterKeywords = domainMap[domain] || [domain.toLowerCase()];
