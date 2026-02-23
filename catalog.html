@@ -402,7 +402,7 @@
                 'TourismSports': ['tourism', 'tourismsports', 'ท่องเที่ยว', 'กีฬา'],
                 'Education': ['education', 'ศึกษา'],
                 'Energy': ['energy', 'พลังงาน'],
-                'Environment': ['environment', 'สิ่งแวดล้อม', 'ทรัพยากร'],
+                'Environment': ['enviro', 'สิ่งแวดล้อม', 'ทรัพยากร'],
                 'Health': ['health', 'สาธารณสุข', 'สุขภาพ'],
                 'SecurityLaw': ['security', 'securitylaw', 'มั่นคง', 'กฎหมาย'],
                 'Society': ['society', 'สังคม', 'สวัสดิการ'],
@@ -418,19 +418,24 @@
             };
 
             const filtered = allDatasets.filter(item => {
-                // Domain Match (Robust mapping check)
+                const allTextContent = Object.values(item).map(v => String(v || '')).join(' ').toLowerCase();
+
+                // Domain Match (Robust mapping check across possible schema keys)
                 let matchDomain = false;
                 if (domain === 'all') {
                     matchDomain = true;
                 } else {
-                    const itemDomain = (item.domain || "").toLowerCase();
+                    // Check all possible keys where domain might have been saved in Google Sheets history
+                    let rawItemDomain = String(item.domain || item.businessDomain || item.businessdomain || item['Business Domain'] || "").toLowerCase();
+
+                    // If no explicit domain column was found in the sheet, fall back to searching the entire record text
+                    if (!rawItemDomain.trim()) rawItemDomain = allTextContent;
+
                     const filterKeywords = domainMap[domain] || [domain.toLowerCase()];
-                    matchDomain = filterKeywords.some(kw => itemDomain.includes(kw));
+                    matchDomain = filterKeywords.some(kw => rawItemDomain.includes(kw));
                 }
 
                 // Advanced Free Text Match (Deep Search across all properties)
-                // We combine all values of the object into a single string for robust searching
-                const allTextContent = Object.values(item).map(v => String(v || '')).join(' ').toLowerCase();
                 const matchQuery = !query || allTextContent.includes(query);
 
                 return matchDomain && matchQuery;
