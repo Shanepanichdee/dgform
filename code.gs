@@ -17,12 +17,12 @@ const INITIAL_HEADERS = {
     'unitOfAnalysis', 'language'
   ],
   Data_Dictionary: [
-    'datasetId', 'submitterAgency', 'domain', 'variable', 'description', 'type',
+    'dictId', 'datasetId', 'submitterAgency', 'domain', 'variable', 'description', 'type',
     'format', 'validation', 'source', 'hasPII', 'classification',
     'dissemination', 'size', 'remarks'
   ],
   Glossary: [
-    'datasetId', 'submitterAgency', 'domain', 'term', 'definition', 'source'
+    'glossaryId', 'datasetId', 'submitterAgency', 'domain', 'term', 'definition', 'source'
   ]
 };
 
@@ -238,6 +238,7 @@ function doPost(e) {
       data.dictionary.forEach(field => {
         // Build flat object
         const fieldObj = {
+          dictId: field.dictId || Utilities.getUuid(), // retain ID if passed (update mode)
           datasetId: datasetId,
           submitterAgency: agency,
           domain: domain,
@@ -252,6 +253,7 @@ function doPost(e) {
       data.glossary.forEach(term => {
         // Build flat object
         const termObj = {
+          glossaryId: term.glossaryId || Utilities.getUuid(), // retain ID if passed (update mode)
           datasetId: datasetId,
           submitterAgency: agency,
           domain: domain,

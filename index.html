@@ -535,14 +535,28 @@
                                     class="required-asterisk">*</span></label>
                             <select class="form-select" id="topicCategory" required>
                                 <option value="" selected disabled>เลือกหัวข้อ...</option>
-                                <option value="Agriculture">เกษตรกรรม (Agriculture)</option>
-                                <option value="Economy">เศรษฐกิจการคลัง (Economy)</option>
+                                <option value="Agriculture">การเกษตร (Agriculture)</option>
+                                <option value="Industry">อุตสาหกรรม (Industry)</option>
+                                <option value="Economy">เศรษฐกิจ การคลัง และงบประมาณ (Economy and Finance)</option>
+                                <option value="Commerce">พาณิชย์ และการบริการ (Commerce and Services)</option>
+                                <option value="TourismSports">การท่องเที่ยวและกีฬา (Tourism and Sports)</option>
                                 <option value="Education">การศึกษา (Education)</option>
-                                <option value="Environment">สิ่งแวดล้อม (Environment)</option>
-                                <option value="Health">สาธารณสุข (Health)</option>
-                                <option value="Transport">การคมนาคม (Transport)</option>
-                                <option value="Society">สังคมและสวัสดิการ (Society)</option>
-                                <option value="Justice">กระบวนการยุติธรรม (Justice)</option>
+                                <option value="Energy">พลังงาน (Energy)</option>
+                                <option value="Environment">สิ่งแวดล้อมและทรัพยากรธรรมชาติ (Environment and Natural
+                                    Resources)</option>
+                                <option value="Health">สาธารณสุขและสุขภาพ (Health)</option>
+                                <option value="SecurityLaw">ความมั่นคงและกฎหมาย (Security and Law)</option>
+                                <option value="Society">สังคมและสวัสดิการ (Society and Welfare)</option>
+                                <option value="ScienceTech">วิทยาศาสตร์ เทคโนโลยี และดิจิทัล (Science and Technology)
+                                </option>
+                                <option value="Transport">การคมนาคมและโลจิสติกส์ (Transport and Logistics)</option>
+                                <option value="Population">ประชากรและเคหะ (Population and Housing)</option>
+                                <option value="CultureReligion">ศาสนา ศิลปะ และวัฒนธรรม (Culture and Religion)</option>
+                                <option value="Infrastructure">การพัฒนาโครงสร้างพื้นฐาน (Infrastructure Development)
+                                </option>
+                                <option value="ForeignAffairs">การต่างประเทศ (Foreign Affairs)</option>
+                                <option value="Labor">แรงงาน (Labor)</option>
+                                <option value="PublicAdmin">การบริหารจัดการภาครัฐ (Public Administration)</option>
                                 <option value="Other">อื่นๆ (Other)</option>
                             </select>
                             <input type="text" class="form-control mt-2 d-none" id="topicCategoryOther"
@@ -972,7 +986,7 @@
                         document.getElementById('emptyGlossaryMsg').classList.add('d-none');
 
                         // Identify and add custom columns
-                        const standardGlossKeys = ['datasetid', 'submitteragency', 'domain', 'term', 'definition', 'source', 'คำศัพท์', 'ความหมาย', 'เจ้าของ'];
+                        const standardGlossKeys = ['glossaryid', 'datasetid', 'submitteragency', 'domain', 'term', 'definition', 'source', 'คำศัพท์', 'ความหมาย', 'เจ้าของ'];
                         const glossCustomKeys = new Set();
                         data.glossary.forEach(item => {
                             Object.keys(item).forEach(k => {
@@ -988,6 +1002,10 @@
                             Object.keys(item).forEach(k => normalizedItem[k.toLowerCase().trim()] = item[k]);
                             addGlossaryRow();
                             const tr = document.querySelector('#glossaryTable tbody tr:last-child');
+
+                            const idInput = tr.querySelector('.gloss-id');
+                            if (idInput) idInput.value = normalizedItem['glossaryid'] || '';
+
                             tr.querySelector('.gloss-term').value = normalizedItem['term'] || normalizedItem['คำศัพท์'] || '';
                             tr.querySelector('.gloss-def').value = normalizedItem['definition'] || normalizedItem['ความหมาย'] || '';
                             tr.querySelector('.gloss-source').value = normalizedItem['source'] || normalizedItem['เจ้าของ'] || '';
@@ -1013,7 +1031,7 @@
                         document.getElementById('emptyDictMsg').classList.add('d-none');
 
                         // Identify and add custom columns
-                        const standardDictKeys = ['datasetid', 'submitteragency', 'domain', 'variable', 'name', 'description', 'type', 'format', 'validation', 'source', 'size', 'remarks', 'haspii', 'classification', 'dissemination'];
+                        const standardDictKeys = ['dictid', 'datasetid', 'submitteragency', 'domain', 'variable', 'name', 'description', 'type', 'format', 'validation', 'source', 'size', 'remarks', 'haspii', 'classification', 'dissemination'];
                         const dictCustomKeys = new Set();
                         data.dictionary.forEach(item => {
                             Object.keys(item).forEach(k => {
@@ -1029,6 +1047,10 @@
                             Object.keys(item).forEach(k => normalizedItem[k.toLowerCase().trim()] = item[k]);
                             addDictRow();
                             const tr = document.querySelector('#dictTable tbody tr:last-child');
+
+                            const idInput = tr.querySelector('.dict-id');
+                            if (idInput) idInput.value = normalizedItem['dictid'] || '';
+
                             tr.querySelector('.dict-var').value = normalizedItem['variable'] || normalizedItem['name'] || '';
                             tr.querySelector('.dict-desc').value = normalizedItem['description'] || '';
                             tr.querySelector('.dict-type').value = normalizedItem['type'] || 'String';
@@ -1155,6 +1177,7 @@
             const tbody = document.querySelector('#glossaryTable tbody');
             const tr = document.createElement('tr');
             let html = `
+                <input type="hidden" class="gloss-id">
                 <td><input type="text" class="form-control form-control-sm gloss-term" placeholder="เช่น GDP, ประชากรแฝง"></td>
                 <td><textarea class="form-control form-control-sm gloss-def" rows="1" placeholder="เช่น ผลิตภัณฑ์มวลรวมในประเทศ"></textarea></td>
                 <td><input type="text" class="form-control form-control-sm gloss-source" placeholder="เช่น กระทรวงคลัง, พจนานุกรม"></td>`;
@@ -1183,6 +1206,7 @@
             const tbody = document.querySelector('#dictTable tbody');
             const tr = document.createElement('tr');
             let html = `
+                <input type="hidden" class="dict-id">
                 <td><input type="text" class="form-control form-control-sm dict-var" placeholder="เช่น cid, firstname"></td>
                 <td><textarea class="form-control form-control-sm dict-desc" rows="1" placeholder="เช่น รหัสบัตรประชาชน"></textarea></td>
                 <td>
@@ -1309,6 +1333,9 @@
             // Collect Glossary (v2 Dynamic)
             document.querySelectorAll('#glossaryTable tbody tr').forEach(row => {
                 const item = {};
+                const idInput = row.querySelector('.gloss-id');
+                if (idInput && idInput.value) item.glossaryId = idInput.value;
+
                 const headers = document.querySelectorAll('#glossaryTable thead th');
                 const cells = row.querySelectorAll('td');
                 headers.forEach((th, index) => {
@@ -1324,6 +1351,9 @@
             // Collect Dictionary (v2 Dynamic)
             document.querySelectorAll('#dictTable tbody tr').forEach(row => {
                 const item = {};
+                const idInput = row.querySelector('.dict-id');
+                if (idInput && idInput.value) item.dictId = idInput.value;
+
                 const headers = document.querySelectorAll('#dictTable thead th');
                 const cells = row.querySelectorAll('td');
                 headers.forEach((th, index) => {
