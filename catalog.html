@@ -453,6 +453,23 @@
 
             if (datasets.length === 0) {
                 noData.classList.remove('d-none');
+
+                // --- DEBUG BLOCK --- (Helps see what data actually exists when filter fails)
+                const debugHtml = `<div class="mt-4 p-3 bg-light border text-start rounded text-muted" style="font-size:10px; max-height:200px; overflow-y:auto; word-wrap:break-word;">
+                    <strong>[Debug Info - Admin Only] Total DB Items: ${allDatasets.length}</strong><br>
+                    <pre>${JSON.stringify(allDatasets.slice(0, 5), null, 2)}</pre>
+                </div>`;
+
+                // Append only once
+                let debugDiv = document.getElementById('debugDump');
+                if (!debugDiv) {
+                    debugDiv = document.createElement('div');
+                    debugDiv.id = 'debugDump';
+                    noData.appendChild(debugDiv);
+                }
+                debugDiv.innerHTML = debugHtml;
+                // -------------------
+
                 return;
             } else {
                 noData.classList.add('d-none');
