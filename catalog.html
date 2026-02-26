@@ -532,8 +532,11 @@
                     <div class="card dataset-card h-100 p-2">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${displayDomain}</span>
-                                <span class="badge bg-light text-dark border"><i class="bi ${lockIcon} me-1"></i> ${classLabel}</span>
+                                <div>
+                                    <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${displayDomain}</span>
+                                    <span class="badge bg-light text-dark border ms-1"><i class="bi ${lockIcon} me-1"></i> ${classLabel}</span>
+                                </div>
+                                <button class="btn btn-sm btn-light text-warning border border-warning shadow-sm" style="position: relative; z-index: 2;" onclick="editDataset(event, '${item.datasetId}')" title="แก้ไขข้อมูล (Admin)"><i class="bi bi-pencil-square"></i></button>
                             </div>
                             <h5 class="card-title fw-bold text-primary mb-1 mt-2 line-clamp-2" title="${item.title || 'Untitled'}">${item.title || '<span class="text-danger fst-italic">Untitled Dataset</span>'}</h5>
                             <p class="text-muted small mb-3"><i class="bi bi-building me-1"></i> ${item.submitterAgency || 'ไม่ระบุหน่วยงาน'}</p>
@@ -675,6 +678,31 @@
             // Init & Show Modal
             const detailModal = new bootstrap.Modal(document.getElementById('datasetDetailModal'));
             detailModal.show();
+        }
+
+
+        function editDataset(event, datasetId) {
+            if (event) event.stopPropagation();
+
+            const dataset = allDatasets.find(d => String(d.datasetId) === String(datasetId));
+            if (!dataset) return;
+
+            const pwd = prompt("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
+            if (pwd !== "admin1234") {
+                if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง!");
+                return; // Cancel edit
+            }
+            sessionStorage.setItem('editAuthed_' + dataset.datasetId, 'true');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            const token = urlParams.get('token');
+
+            let editUrl = `index.html?editId=${encodeURIComponent(dataset.datasetId)}`;
+            if (id) editUrl += `&id=${id}`;
+            else if (token) editUrl += `&token=${token}`;
+
+            window.location.href = editUrl;
         }
 
 
