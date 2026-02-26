@@ -642,6 +642,14 @@
                     <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-tags me-2"></i>คำสำคัญ (Keywords)</h6>
                     <div>${keywordBadges}</div>
                 </div>
+                
+                <!-- Placeholder for Data Dictionary and Glossary (Lazy Loaded) -->
+                <div id="dictGlossaryContainer" class="mt-4">
+                    <div class="text-center text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        กำลังโหลดข้อมูลพจนานุกรม...
+                    </div>
+                </div>
             `;
 
             // Action button (External link if provided)
@@ -678,6 +686,97 @@
             // Init & Show Modal
             const detailModal = new bootstrap.Modal(document.getElementById('datasetDetailModal'));
             detailModal.show();
+
+            // Lazy Load Full Dataset Details (Dictionary & Glossary)
+            if (window.currentScriptUrl) {
+                const urlObj = new URL(window.currentScriptUrl);
+                urlObj.searchParams.append('action', 'getDataset');
+                urlObj.searchParams.append('datasetId', dataset.datasetId);
+
+                fetch(urlObj.toString())
+                    .then(res => res.json())
+                    .then(fullDataResult => {
+                        const container = document.getElementById('dictGlossaryContainer');
+                        if (fullDataResult.result === 'success' && fullDataResult.data) {
+                            const fullData = fullDataResult.data;
+                            let html = '';
+
+                            // Render Data Dictionary if exists
+                            if (fullData.dictionary && fullData.dictionary.length > 0) {
+                                html += `
+                                    <h6 class="fw-bold text-secondary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-journal-text me-2"></i>พจนานุกรมข้อมูล (Data Dictionary)</h6>
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-bordered table-striped table-sm align-middle" style="font-size: 0.9em;">
+                                            <thead class="table-light text-center">
+                                                <tr>
+                                                    <th>ชื่อตัวแปร (Variable/ชื่อฟิลด์)</th>
+                                                    <th>คำอธิบาย (Description)</th>
+                                                    <th>ชนิดข้อมูล (Type)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                `;
+                                fullData.dictionary.forEach(dict => {
+                                    html += `
+                                        <tr>
+                                            <td class="fw-bold text-primary">${dict.variable || '-'}</td>
+                                            <td>${dict.description || '-'}</td>
+                                            <td class="text-center"><span class="badge bg-secondary">${dict.type || '-'}</span></td>
+                                        </tr>
+                                    `;
+                                });
+                                html += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                `;
+                            }
+
+                            // Render Glossary if exists
+                            if (fullData.glossary && fullData.glossary.length > 0) {
+                                html += `
+                                    <h6 class="fw-bold text-secondary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-translate me-2"></i>อภิธานศัพท์ (Glossary)</h6>
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-bordered table-striped table-sm align-middle" style="font-size: 0.9em;">
+                                            <thead class="table-light text-center">
+                                                <tr>
+                                                    <th>คำศัพท์ (Term)</th>
+                                                    <th>ความหมาย (Definition)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                `;
+                                fullData.glossary.forEach(glos => {
+                                    html += `
+                                        <tr>
+                                            <td class="fw-bold" style="width: 30%;">${glos.term || '-'}</td>
+                                            <td>${glos.definition || '-'}</td>
+                                        </tr>
+                                    `;
+                                });
+                                html += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                `;
+                            }
+
+                            if (html === '') {
+                                html = '<p class="text-muted fst-italic mt-4 text-center">ไม่พบพจนานุกรมข้อมูลอิงอภิธานศัพท์ที่เชื่อมโยงกับชุดข้อมูลนี้</p>';
+                            }
+
+                            container.innerHTML = html;
+                        } else {
+                            container.innerHTML = '<div class="alert alert-warning py-2 mt-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>ไม่สามารถดาวน์โหลดพจนานุกรมข้อมูลได้</div>';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to load dictionary:', err);
+                        document.getElementById('dictGlossaryContainer').innerHTML = '<div class="alert alert-danger py-2 mt-3"><i class="bi bi-x-circle-fill me-2"></i>เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อโหลดพจนานุกรม</div>';
+                    });
+            } else {
+                document.getElementById('dictGlossaryContainer').innerHTML = '';
+            }
         }
 
 
