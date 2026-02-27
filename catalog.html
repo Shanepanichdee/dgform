@@ -604,65 +604,75 @@
             }
 
             modalBody.innerHTML = `
-                <h4 class="fw-bold text-primary mb-3">${dataset.title || 'Untitled Dataset'}</h4>
-                <p class="text-muted mb-4"><i class="bi bi-building me-1"></i> หน่วยงาน: <strong>${dataset.submitterAgency || 'ไม่ระบุ'}</strong></p>
-                
-                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-card-text me-2"></i>คำอธิบายชุดข้อมูล (Description)</h6>
-                <p class="mb-4">${dataset.description || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
-
-                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-bullseye me-2"></i>วัตถุประสงค์ (Objective)</h6>
-                <p class="mb-4">${dataset.objective || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
-
-                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-list-columns-reverse me-2"></i>คุณลักษณะชุดข้อมูล (Properties)</h6>
-                <div class="table-responsive mb-4">
-                    <table class="table table-bordered table-sm rounded shadow-sm align-middle">
-                        <tbody>
-                            <tr>
-                                <th class="bg-light text-end pe-3" style="width: 35%;">โดเมนข้อมูล (Domain)</th>
-                                <td class="ps-3">${dataset.domain || '-'}</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">กลุ่มหัวข้อระดับประเทศ</th>
-                                <td class="ps-3">${dataset.topicCategory || '-'}</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">ระดับการเผยแพร่</th>
-                                <td class="ps-3"><span class="badge ${String(dataset.classification).toLowerCase().includes('private') ? 'bg-danger' : 'bg-success'}">${dataset.classification || 'Private'}</span></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">ความถี่ที่ปรับปรุง</th>
-                                <td class="ps-3">${dataset.updateFreqValue || ''} ${dataset.updateFreqUnit || '-'}</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">รูปแบบไฟล์ (Format)</th>
-                                <td class="ps-3"><span class="badge border border-secondary text-secondary">${dataset.fileFormat || '-'}</span></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">สัญญาอนุญาต (License)</th>
-                                <td class="ps-3">${dataset.license || '-'}</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">วันที่สร้าง</th>
-                                <td class="ps-3">${created}</td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-end pe-3">วันที่ปรับปรุงล่าสุด</th>
-                                <td class="ps-3">${updated}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-2">${dataset.title || 'Untitled Dataset'}</h4>
+                    <p class="text-muted"><i class="bi bi-building me-1"></i> หน่วยงานเจ้าของข้อมูล: <strong>${dataset.submitterAgency || 'ไม่ระบุ'}</strong></p>
                 </div>
 
-                <div class="mt-2">
-                    <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-tags me-2"></i>คำสำคัญ (Keywords)</h6>
-                    <div>${keywordBadges}</div>
+                <!-- 🌟 BUSINESS METADATA SECTION -->
+                <div class="border rounded-4 p-4 mb-4 bg-white shadow-sm" style="border-left: 5px solid #0d6efd !important;">
+                    <h5 class="fw-bold text-primary mb-4"><i class="bi bi-briefcase-fill me-2"></i>Business Metadata (ข้อมูลเชิงธุรกิจ)</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">โดเมนข้อมูล (Domain)</h6>
+                            <p class="mb-0 fs-5">${dataset.domain || '-'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">กลุ่มหัวข้อระดับประเทศ</h6>
+                            <p class="mb-0 fs-5">${dataset.topicCategory || '-'}</p>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">คำอธิบายชุดข้อมูล (Description)</h6>
+                    <p class="mb-3">${dataset.description || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
+
+                    <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">วัตถุประสงค์ (Objective)</h6>
+                    <p class="mb-3">${dataset.objective || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
+
+                    <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">คำสำคัญ (Keywords)</h6>
+                    <div class="mb-3">${keywordBadges}</div>
+
+                    <!-- Glossary Placeholder inside Business Section -->
+                    <div id="glossaryContainer" class="mt-4">
+                        <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm me-1" role="status"></div> กำลังโหลดอภิธานศัพท์...</div>
+                    </div>
                 </div>
-                
-                <!-- Placeholder for Data Dictionary and Glossary (Lazy Loaded) -->
-                <div id="dictGlossaryContainer" class="mt-4">
-                    <div class="text-center text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                        กำลังโหลดข้อมูลพจนานุกรม...
+
+                <!-- ⚙️ TECHNICAL METADATA SECTION -->
+                <div class="border rounded-4 p-4 bg-white shadow-sm" style="border-left: 5px solid #6c757d !important;">
+                    <h5 class="fw-bold text-secondary mb-4"><i class="bi bi-gear-fill me-2"></i>Technical Metadata (ข้อมูลเชิงเทคนิค)</h5>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4 col-6 mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">ระดับการเผยแพร่</h6>
+                            <div><span class="badge ${String(dataset.classification).toLowerCase().includes('private') ? 'bg-danger' : 'bg-success'}">${dataset.classification || 'Private'}</span></div>
+                        </div>
+                        <div class="col-md-4 col-6 mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">รูปแบบไฟล์ (Format)</h6>
+                            <div><span class="badge border border-secondary text-secondary">${dataset.fileFormat || '-'}</span></div>
+                        </div>
+                        <div class="col-md-4 col-6 mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">ความถี่ที่ปรับปรุง</h6>
+                            <p class="mb-0">${dataset.updateFreqValue || ''} ${dataset.updateFreqUnit || '-'}</p>
+                        </div>
+                        <div class="col-md-4 col-6 mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">วันที่สร้าง</h6>
+                            <p class="mb-0 small">${created}</p>
+                        </div>
+                        <div class="col-md-4 col-6 mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">วันที่แก้ไขล่าสุด</h6>
+                            <p class="mb-0 small">${updated}</p>
+                        </div>
+                        <div class="col-md-4 col-6 mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">สัญญาอนุญาต (License)</h6>
+                            <p class="mb-0 small">${dataset.license || '-'}</p>
+                        </div>
+                    </div>
+
+                    <!-- Dictionary Placeholder inside Technical Section -->
+                    <div id="dictionaryContainer" class="mt-2">
+                        <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm me-1" role="status"></div> กำลังโหลดพจนานุกรมข้อมูล...</div>
                     </div>
                 </div>
             `;
@@ -711,83 +721,86 @@
                 fetch(urlObj.toString())
                     .then(res => res.json())
                     .then(fullDataResult => {
-                        const container = document.getElementById('dictGlossaryContainer');
+                        const dictContainer = document.getElementById('dictionaryContainer');
+                        const glosContainer = document.getElementById('glossaryContainer');
+
                         if (fullDataResult.result === 'success' && fullDataResult.data) {
                             const fullData = fullDataResult.data;
-                            let html = '';
 
                             // Render Data Dictionary if exists
                             if (fullData.dictionary && fullData.dictionary.length > 0) {
-                                html += `
-                                    <h6 class="fw-bold text-secondary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-journal-text me-2"></i>พจนานุกรมข้อมูล (Data Dictionary)</h6>
-                                    <div class="table-responsive mb-4">
+                                let dictHtml = `
+                                    <h6 class="fw-bold text-secondary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-journal-code me-2"></i>โครงสร้างพจนานุกรมข้อมูล (Data Dictionary)</h6>
+                                    <div class="table-responsive mb-2">
                                         <table class="table table-bordered table-striped table-sm align-middle" style="font-size: 0.9em;">
                                             <thead class="table-light text-center">
                                                 <tr>
-                                                    <th>ชื่อตัวแปร (Variable/ชื่อฟิลด์)</th>
-                                                    <th>คำอธิบาย (Description)</th>
+                                                    <th>ชื่อตัวแปร (Variable/Field)</th>
                                                     <th>ชนิดข้อมูล (Type)</th>
+                                                    <th>คำอธิบาย (Technical Description)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                 `;
                                 fullData.dictionary.forEach(dict => {
-                                    html += `
+                                    dictHtml += `
                                         <tr>
-                                            <td class="fw-bold text-primary">${dict.variable || '-'}</td>
+                                            <td class="fw-bold font-monospace text-primary text-nowrap">${dict.variable || '-'}</td>
+                                            <td class="text-center"><span class="badge bg-secondary font-monospace">${dict.type || '-'}</span></td>
                                             <td>${dict.description || '-'}</td>
-                                            <td class="text-center"><span class="badge bg-secondary">${dict.type || '-'}</span></td>
                                         </tr>
                                     `;
                                 });
-                                html += `
+                                dictHtml += `
                                             </tbody>
                                         </table>
                                     </div>
                                 `;
+                                dictContainer.innerHTML = dictHtml;
+                            } else {
+                                dictContainer.innerHTML = '<p class="text-muted fst-italic mt-2 mb-0 small"><i class="bi bi-info-circle me-1"></i>ไม่พบโครงสร้างพจนานุกรมข้อมูลสำหรับชุดข้อมูลนี้</p>';
                             }
 
                             // Render Glossary if exists
                             if (fullData.glossary && fullData.glossary.length > 0) {
-                                html += `
-                                    <h6 class="fw-bold text-secondary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-translate me-2"></i>อภิธานศัพท์ (Glossary)</h6>
-                                    <div class="table-responsive mb-4">
+                                let glosHtml = `
+                                    <h6 class="fw-bold text-primary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-translate me-2"></i>อภิธานศัพท์ (Business Glossary)</h6>
+                                    <div class="table-responsive mb-2">
                                         <table class="table table-bordered table-striped table-sm align-middle" style="font-size: 0.9em;">
-                                            <thead class="table-light text-center">
+                                            <thead class="table-primary text-center">
                                                 <tr>
-                                                    <th>คำศัพท์ (Term)</th>
+                                                    <th>คำศัพท์ทางธุรกิจ (Business Term)</th>
                                                     <th>ความหมาย (Definition)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                 `;
                                 fullData.glossary.forEach(glos => {
-                                    html += `
+                                    glosHtml += `
                                         <tr>
-                                            <td class="fw-bold" style="width: 30%;">${glos.term || '-'}</td>
+                                            <td class="fw-bold text-primary" style="width: 30%;">${glos.term || '-'}</td>
                                             <td>${glos.definition || '-'}</td>
                                         </tr>
                                     `;
                                 });
-                                html += `
+                                glosHtml += `
                                             </tbody>
                                         </table>
                                     </div>
                                 `;
+                                glosContainer.innerHTML = glosHtml;
+                            } else {
+                                glosContainer.innerHTML = '<p class="text-muted fst-italic mt-2 mb-0 small"><i class="bi bi-info-circle me-1"></i>ไม่พบอภิธานศัพท์ธุรกิจในชุดข้อมูลนี้</p>';
                             }
-
-                            if (html === '') {
-                                html = '<p class="text-muted fst-italic mt-4 text-center">ไม่พบพจนานุกรมข้อมูลอิงอภิธานศัพท์ที่เชื่อมโยงกับชุดข้อมูลนี้</p>';
-                            }
-
-                            container.innerHTML = html;
                         } else {
-                            container.innerHTML = '<div class="alert alert-warning py-2 mt-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>ไม่สามารถดาวน์โหลดพจนานุกรมข้อมูลได้</div>';
+                            dictContainer.innerHTML = '<div class="alert alert-warning py-2 mt-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>ไม่สามารถดาวน์โหลดข้อมูลด้านเทคนิคได้</div>';
+                            glosContainer.innerHTML = '';
                         }
                     })
                     .catch(err => {
                         console.error('Failed to load dictionary:', err);
-                        document.getElementById('dictGlossaryContainer').innerHTML = '<div class="alert alert-danger py-2 mt-3"><i class="bi bi-x-circle-fill me-2"></i>เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อโหลดพจนานุกรม</div>';
+                        document.getElementById('dictionaryContainer').innerHTML = '<div class="alert alert-danger py-2 mt-3"><i class="bi bi-x-circle-fill me-2"></i>เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อโหลดข้อมูลเทคนิค</div>';
+                        document.getElementById('glossaryContainer').innerHTML = '';
                     });
             } else {
                 document.getElementById('dictGlossaryContainer').innerHTML = '';
