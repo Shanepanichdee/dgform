@@ -3,10 +3,28 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { Storage } = require('@google-cloud/storage');
+const winston = require('winston');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Setup Winston Logger
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(({ timestamp, level, message }) => {
+            return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
+        })
+    ),
+    transports: [
+        // Write all logs with level `info` and below to `app_activity.log`
+        new winston.transports.File({ filename: path.join(__dirname, 'logs', 'app_activity.log') }),
+        new winston.transports.Console() // Also print to console
+    ],
+});
 
 // Middleware
 app.use(cors());
@@ -63,10 +81,10 @@ app.post('/api/login', (req, res) => {
     const validPass = process.env.ADMIN_PASSWORD || 'password@123';
 
     if (username === validUser && password === validPass) {
-        console.log(`[AUTH] Login successful for user: ${username}`);
+        logger.info(`[AUTH] Login successful for user: ${username}`);
         res.status(200).json({ success: true, message: 'Login successful' });
     } else {
-        console.warn(`[AUTH] Failed login attempt for user: ${username}`);
+        logger.warn(`[AUTH] Failed login attempt for user: ${username}`);
         res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 });
@@ -76,22 +94,29 @@ app.get('/', (req, res) => {
     res.send('Metadata Repository Backend is Running! 🚀');
 });
 
-// 1. Save to MongoDB
+// 1. Save to MongoDB (with local file fallback and always logging)
 app.post('/api/save/mongodb', async (req, res) => {
-    if (mongoose.connection.readyState !== 1) {
-        return res.status(503).json({ error: 'MongoDB service not available' });
-    }
+    const data = req.body;
+    const isMongoConnected = mongoose.connection.readyState === 1;
+
     try {
-        const data = req.body;
-        // Optionally generate a custom ID or use MongoDB's _id
+        // ALWAYS log locally
+        logger.info(`[LOCAL_SAVE_LOG] Domain: ${data.domain || 'Unknown'} | Title: ${data.title || 'Untitled'} | Data: ${JSON.stringify(data)}`);
+
+        if (!isMongoConnected) {
+            // If Mongo is offline, return success early as we already logged locally
+            return res.status(200).json({ message: 'Saved to Local Log successfully (MongoDB offline)', id: `local-${Date.now()}` });
+        }
+
+        // Generate a custom ID or use MongoDB's _id
         const newRecord = new Metadata(data);
         await newRecord.save();
 
-        console.log(`Saved document to MongoDB: ${newRecord._id}`);
-        res.status(200).json({ message: 'Saved to MongoDB successfully', id: newRecord._id });
+        logger.info(`[MONGODB] Saved document ID: ${newRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
+        res.status(200).json({ message: 'Saved to Local Log and MongoDB successfully', id: newRecord._id });
     } catch (error) {
-        console.error('MongoDB Save Error:', error);
-        res.status(500).json({ error: 'Failed to save to MongoDB' });
+        logger.error(`[SAVE_ERROR] Failed to save: ${error.message}`);
+        res.status(500).json({ error: 'Failed to save data' });
     }
 });
 
@@ -110,17 +135,21 @@ app.post('/api/save/gcs', async (req, res) => {
         const filename = `raw/${domain}/${title}_${timestamp}.json`;
         const file = bucket.file(filename);
 
-        await file.save(JSON.stringify(data, null, 2), {
+        // Calculate size for logging
+        const dataString = JSON.stringify(data, null, 2);
+        const sizeBytes = Buffer.byteLength(dataString, 'utf8');
+
+        await file.save(dataString, {
             contentType: 'application/json',
             metadata: {
                 cacheControl: 'no-cache',
             },
         });
 
-        console.log(`Uploaded file to GCS: ${filename}`);
+        logger.info(`[GCS] Uploaded file: ${filename} | Size: ${sizeBytes} bytes | Action: ${data.action || 'Unknown'}`);
         res.status(200).json({ message: 'Saved to GCS Data Lake successfully', path: filename });
     } catch (error) {
-        console.error('GCS Upload Error:', error);
+        logger.error(`[GCS] Upload Error: ${error.message}`);
         res.status(500).json({ error: 'Failed to save to GCS' });
     }
 });
