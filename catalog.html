@@ -603,6 +603,33 @@
                 keywordBadges = `<span class="text-muted fst-italic">ไม่มีแท็ก (No Tags)</span>`;
             }
 
+            // --- DQ Rules Parser ---
+            let semanticRules = [];
+            let businessRules = [];
+            let complianceRules = [];
+
+            function parseAndCleanRules(text, fieldName) {
+                if (!text) return text;
+                let cleanText = text;
+                const rulePattern = /(#SEM:|#BIZ:|#COM:)(.*?)(?=$|#SEM:|#BIZ:|#COM:|\n)/g;
+
+                let match;
+                while ((match = rulePattern.exec(text)) !== null) {
+                    const type = match[1];
+                    const ruleText = match[2].trim();
+                    if (type === '#SEM:') semanticRules.push({ field: fieldName, rule: ruleText });
+                    else if (type === '#BIZ:') businessRules.push({ field: fieldName, rule: ruleText });
+                    else if (type === '#COM:') complianceRules.push({ field: fieldName, rule: ruleText });
+
+                    cleanText = cleanText.replace(match[0], '');
+                }
+                return cleanText.trim();
+            }
+
+            const cleanDescription = parseAndCleanRules(dataset.description, 'ภาพรวมข้อมูล (General)');
+            const cleanObjective = parseAndCleanRules(dataset.objective, 'วัตถุประสงค์ (Objective)');
+            // -----------------------
+
             modalBody.innerHTML = `
                 <div class="mb-4">
                     <h4 class="fw-bold text-dark mb-2">${dataset.title || 'Untitled Dataset'}</h4>
@@ -625,10 +652,10 @@
                     </div>
 
                     <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">คำอธิบายชุดข้อมูล (Description)</h6>
-                    <p class="mb-3">${dataset.description || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
+                    <p class="mb-3">${cleanDescription || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
 
                     <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">วัตถุประสงค์ (Objective)</h6>
-                    <p class="mb-3">${dataset.objective || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
+                    <p class="mb-3">${cleanObjective || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
 
                     <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">คำสำคัญ (Keywords)</h6>
                     <div class="mb-3">${keywordBadges}</div>
@@ -674,6 +701,11 @@
                     <div id="dictionaryContainer" class="mt-2">
                         <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm me-1" role="status"></div> กำลังโหลดพจนานุกรมข้อมูล...</div>
                     </div>
+                </div>
+
+                <!-- 🛡️ DATA QUALITY SCORECARD SECTION (Placeholder) -->
+                <div id="dqScorecardContainer" class="mt-4">
+                    <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm me-1" role="status"></div> กำลังประมวลผล Data Quality Rules...</div>
                 </div>
             `;
 
@@ -743,11 +775,14 @@
                                             <tbody>
                                 `;
                                 fullData.dictionary.forEach(dict => {
+                                    // Extract tags from dictionary description
+                                    const cleanDictDesc = parseAndCleanRules(dict.description, dict.variable || 'Unknown Field');
+
                                     dictHtml += `
                                         <tr>
                                             <td class="fw-bold font-monospace text-primary text-nowrap">${dict.variable || '-'}</td>
                                             <td class="text-center"><span class="badge bg-secondary font-monospace">${dict.type || '-'}</span></td>
-                                            <td>${dict.description || '-'}</td>
+                                            <td>${cleanDictDesc || '-'}</td>
                                         </tr>
                                     `;
                                 });
@@ -792,9 +827,51 @@
                             } else {
                                 glosContainer.innerHTML = '<p class="text-muted fst-italic mt-2 mb-0 small"><i class="bi bi-info-circle me-1"></i>ไม่พบอภิธานศัพท์ธุรกิจในชุดข้อมูลนี้</p>';
                             }
+
+                            // --- RENDER DQ SCORECARD ---
+                            const dqContainer = document.getElementById('dqScorecardContainer');
+
+                            // Only show if there are rules
+                            if (semanticRules.length > 0 || businessRules.length > 0 || complianceRules.length > 0) {
+                                function renderRuleList(rules, icon, textColor) {
+                                    if (rules.length === 0) return `<p class="text-muted small fst-italic mb-0">- ไม่มีข้อกำหนด -</p>`;
+                                    return `<ul class="list-unstyled mb-0 small">` + rules.map(r => `<li class="mb-2"><i class="bi ${icon} ${textColor} me-2"></i><strong>${r.field}:</strong> ${r.rule}</li>`).join('') + `</ul>`;
+                                }
+
+                                dqContainer.innerHTML = `
+                                    <div class="border rounded-4 p-4 bg-white shadow-sm" style="border-left: 5px solid #198754 !important;">
+                                        <h5 class="fw-bold text-success mb-4"><i class="bi bi-shield-fill-check me-2"></i>Data Quality & Compliance Rules</h5>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <div class="p-3 border rounded bg-light h-100">
+                                                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="bi bi-braces-asterisk me-1"></i> Semantic Rules</h6>
+                                                    ${renderRuleList(semanticRules, 'bi-check-circle-fill', 'text-primary')}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="p-3 border rounded bg-light h-100">
+                                                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3" style="color: #fd7e14 !important;"><i class="bi bi-diagram-2-fill me-1"></i> Business Rules</h6>
+                                                    ${renderRuleList(businessRules, 'bi-exclamation-circle-fill', 'text-warning')}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="p-3 border rounded bg-light h-100">
+                                                    <h6 class="fw-bold text-danger border-bottom pb-2 mb-3"><i class="bi bi-lock-fill me-1"></i> Compliance</h6>
+                                                    ${renderRuleList(complianceRules, 'bi-shield-lock-fill', 'text-danger')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                dqContainer.innerHTML = ''; // Hide if no rules
+                            }
+                            // -----------------------------
+
                         } else {
                             dictContainer.innerHTML = '<div class="alert alert-warning py-2 mt-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>ไม่สามารถดาวน์โหลดข้อมูลด้านเทคนิคได้</div>';
                             glosContainer.innerHTML = '';
+                            document.getElementById('dqScorecardContainer').innerHTML = '';
                         }
                     })
                     .catch(err => {
