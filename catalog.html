@@ -788,11 +788,24 @@
                                     // --- Auto PII/SPII Detectors (Strict Rule-Based) ---
                                     // 1. Exact Variable Name Matching (ป้องกันการจับผิดคำ เช่น PROVINCE_NAME ไม่ใช่ชื่อคน)
                                     const varName = String(dict.variable || '').toLowerCase().trim();
-                                    const piiVarNames = ['name', 'fname', 'lname', 'first_name', 'last_name', 'firstname', 'lastname', 'idcard', 'id_card', 'cid', 'phone', 'telephone', 'mobile', 'email', 'address', 'birthdate', 'dob', 'age', 'gender', 'sex', 'nationality', 'passport'];
+                                    const piiVarNames = [
+                                        'name', 'fname', 'lname', 'first_name', 'last_name', 'firstname', 'lastname',
+                                        'idcard', 'id_card', 'cid', 'phone', 'telephone', 'mobile', 'email', 'address',
+                                        'birthdate', 'dob', 'age', 'gender', 'sex', 'nationality', 'passport',
+                                        // Owner & Specific Address fields
+                                        'own_name', 'oaddress', 'omoo', 'osoi', 'oroad', 'otum', 'oamp', 'oprov',
+                                        'site_name', 'saddress', 'smoo', 'ssoi', 'sroad', 'stumname', 'sampname', 'sprovname',
+                                        'mac_qty_mortgage'
+                                    ];
                                     const spiiVarNames = ['religion', 'blood_type', 'blood', 'disease', 'password', 'fingerprint', 'biometric', 'salary', 'income'];
 
                                     // 2. Strict Thai Phrases in Description (ใช้คำที่เฉพาะเจาะจง ป้องกันคำสั้นๆ อย่าง "อายุ" หรือ "ชื่อ" ไปตรงกับคำอื่น)
-                                    const piiThaiPhrases = ['ชื่อ-นามสกุล', 'ชื่อนามสกุล', 'ชื่อและนามสกุล', 'คำนำหน้าชื่อ', 'บัตรประจำตัวประชาชน', 'เลขที่บัตรประชาชน', 'เบอร์โทรศัพท์ติดต่อ', 'ที่อยู่อีเมล', 'ที่อยู่จัดส่ง', 'วันเดือนปีเกิด', 'หมายเลขโทรศัพท์', 'ข้อมูลส่วนบุคคล'];
+                                    const piiThaiPhrases = [
+                                        'ชื่อ-นามสกุล', 'ชื่อนามสกุล', 'ชื่อและนามสกุล', 'คำนำหน้าชื่อ',
+                                        'บัตรประจำตัวประชาชน', 'เลขที่บัตรประชาชน', 'เบอร์โทรศัพท์ติดต่อ', 'ที่อยู่อีเมล',
+                                        'ที่อยู่จัดส่ง', 'วันเดือนปีเกิด', 'หมายเลขโทรศัพท์', 'ข้อมูลส่วนบุคคล',
+                                        'ผู้ถือกรรมสิทธิ์', 'สถานที่ตั้ง'
+                                    ];
                                     const spiiThaiPhrases = ['ศาสนาที่นับถือ', 'กรุ๊ปเลือด', 'ประวัติอาชญากรรม', 'รหัสผ่านเข้าสู่ระบบ', 'ลายนิ้วมือ', 'ข้อมูลอ่อนไหว'];
                                     const idCardRegex = /13\s*หลัก/i;
 
@@ -807,13 +820,14 @@
                                         }
                                     }
 
-                                    // Check for Privacy Info based on strict rules
+                                    // Check for Privacy Info based on strict rules + explicit hasPII column
                                     const lowerText = combinedTextForScan.toLowerCase();
+                                    const explicitPiiVal = String(dict.hasPII || dict.haspii || dict.HasPII || dict.pii || '').toLowerCase().trim();
                                     let privacyLevel = null;
 
                                     if (spiiVarNames.includes(varName) || spiiThaiPhrases.some(phrase => lowerText.includes(phrase)) || lowerText.includes('sensitive data')) {
                                         privacyLevel = 'SPII';
-                                    } else if (piiVarNames.includes(varName) || piiThaiPhrases.some(phrase => lowerText.includes(phrase)) || idCardRegex.test(lowerText) || lowerText.includes('pii data') || lowerText.includes('personal data')) {
+                                    } else if (explicitPiiVal === 'yes' || explicitPiiVal === 'y' || piiVarNames.includes(varName) || piiThaiPhrases.some(phrase => lowerText.includes(phrase)) || idCardRegex.test(lowerText) || lowerText.includes('pii data') || lowerText.includes('personal data')) {
                                         privacyLevel = 'PII';
                                     }
 
