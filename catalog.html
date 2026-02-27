@@ -609,8 +609,9 @@
             let complianceRules = [];
 
             function parseAndCleanRules(text, fieldName) {
-                if (!text) return text;
+                if (!text || typeof text !== 'string') return text;
                 let cleanText = text;
+                // Regular Expression to find exactly the tags and capture their rule text
                 const rulePattern = /(#SEM:|#BIZ:|#COM:)(.*?)(?=$|#SEM:|#BIZ:|#COM:|\n)/g;
 
                 let match;
@@ -621,19 +622,28 @@
                     else if (type === '#BIZ:') businessRules.push({ field: fieldName, rule: ruleText });
                     else if (type === '#COM:') complianceRules.push({ field: fieldName, rule: ruleText });
 
+                    // Remove the rule from the display text
                     cleanText = cleanText.replace(match[0], '');
                 }
                 return cleanText.trim();
             }
 
-            const cleanDescription = parseAndCleanRules(dataset.description, 'ภาพรวมข้อมูล (General)');
-            const cleanObjective = parseAndCleanRules(dataset.objective, 'วัตถุประสงค์ (Objective)');
+            // Clone dataset to safely extract rules from ALL properties without breaking the catalog cache
+            const dsClone = JSON.parse(JSON.stringify(dataset));
+            for (let key in dsClone) {
+                if (typeof dsClone[key] === 'string') {
+                    dsClone[key] = parseAndCleanRules(dsClone[key], 'ภาพรวมชุดข้อมูล (General)');
+                }
+            }
+
+            const cleanDescription = dsClone.description;
+            const cleanObjective = dsClone.objective;
             // -----------------------
 
             modalBody.innerHTML = `
                 <div class="mb-4">
-                    <h4 class="fw-bold text-dark mb-2">${dataset.title || 'Untitled Dataset'}</h4>
-                    <p class="text-muted"><i class="bi bi-building me-1"></i> หน่วยงานเจ้าของข้อมูล: <strong>${dataset.submitterAgency || 'ไม่ระบุ'}</strong></p>
+                    <h4 class="fw-bold text-dark mb-2">${dsClone.title || 'Untitled Dataset'}</h4>
+                    <p class="text-muted"><i class="bi bi-building me-1"></i> หน่วยงานเจ้าของข้อมูล: <strong>${dsClone.submitterAgency || 'ไม่ระบุ'}</strong></p>
                 </div>
 
                 <!-- 🌟 BUSINESS METADATA SECTION -->
@@ -643,11 +653,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">โดเมนข้อมูล (Domain)</h6>
-                            <p class="mb-0 fs-5">${dataset.domain || '-'}</p>
+                            <p class="mb-0 fs-5">${dsClone.domain || '-'}</p>
                         </div>
                         <div class="col-md-6">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">กลุ่มหัวข้อระดับประเทศ</h6>
-                            <p class="mb-0 fs-5">${dataset.topicCategory || '-'}</p>
+                            <p class="mb-0 fs-5">${dsClone.topicCategory || '-'}</p>
                         </div>
                     </div>
 
@@ -775,14 +785,18 @@
                                             <tbody>
                                 `;
                                 fullData.dictionary.forEach(dict => {
-                                    // Extract tags from dictionary description
-                                    const cleanDictDesc = parseAndCleanRules(dict.description, dict.variable || 'Unknown Field');
+                                    // Extract tags from ALL columns in this dictionary row (even hidden ones!)
+                                    for (let key in dict) {
+                                        if (typeof dict[key] === 'string') {
+                                            dict[key] = parseAndCleanRules(dict[key], dict.variable || 'Unknown Field');
+                                        }
+                                    }
 
                                     dictHtml += `
                                         <tr>
                                             <td class="fw-bold font-monospace text-primary text-nowrap">${dict.variable || '-'}</td>
                                             <td class="text-center"><span class="badge bg-secondary font-monospace">${dict.type || '-'}</span></td>
-                                            <td>${cleanDictDesc || '-'}</td>
+                                            <td>${dict.description || '-'}</td>
                                         </tr>
                                     `;
                                 });
