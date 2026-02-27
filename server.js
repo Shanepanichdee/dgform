@@ -101,22 +101,46 @@ app.post('/api/save/mongodb', async (req, res) => {
 
     try {
         // ALWAYS log locally
-        logger.info(`[LOCAL_SAVE_LOG] Domain: ${data.domain || 'Unknown'} | Title: ${data.title || 'Untitled'} | Data: ${JSON.stringify(data)}`);
+        const actionText = data.action === 'update' ? '[LOCAL_UPDATE_LOG]' : '[LOCAL_SAVE_LOG]';
+        logger.info(`${actionText} Domain: ${data.domain || 'Unknown'} | Title: ${data.title || 'Untitled'} | Data: ${JSON.stringify(data)}`);
 
         if (!isMongoConnected) {
             // If Mongo is offline, return success early as we already logged locally
             return res.status(200).json({ message: 'Saved to Local Log successfully (MongoDB offline)', id: `local-${Date.now()}` });
         }
 
-        // Generate a custom ID or use MongoDB's _id
+        if (data.action === 'update') {
+            // Attempt to find existing record
+            let existingRecord = null;
+            if (data.datasetId) {
+                existingRecord = await Metadata.findOne({ datasetId: data.datasetId });
+            }
+
+            // If we don't have it by datasetId yet (because GAS generated it later), fallback to Title + Agency
+            if (!existingRecord) {
+                existingRecord = await Metadata.findOne({ title: data.title, submitterAgency: data.submitterAgency });
+            }
+
+            if (existingRecord) {
+                // Update the existing record with new data (including capturing the datasetId for the future)
+                Object.assign(existingRecord, data);
+                await existingRecord.save();
+
+                logger.info(`[MONGODB_UPDATE] Updated document ID: ${existingRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
+                return res.status(200).json({ message: 'Updated Local Log and MongoDB successfully', id: existingRecord._id });
+            }
+            // If not found at all, it will fall through to insertion below
+        }
+
+        // Generate a custom ID or use MongoDB's _id for new inserts (or if update record wasn't found)
         const newRecord = new Metadata(data);
         await newRecord.save();
 
-        logger.info(`[MONGODB] Saved document ID: ${newRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
+        logger.info(`[MONGODB_INSERT] Saved new document ID: ${newRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
         res.status(200).json({ message: 'Saved to Local Log and MongoDB successfully', id: newRecord._id });
     } catch (error) {
-        logger.error(`[SAVE_ERROR] Failed to save: ${error.message}`);
-        res.status(500).json({ error: 'Failed to save data' });
+        logger.error(`[SAVE_ERROR] Failed to save/update: ${error.message}`);
+        res.status(500).json({ error: 'Failed to process data in MongoDB' });
     }
 });
 
