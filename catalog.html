@@ -785,16 +785,44 @@
                                             <tbody>
                                 `;
                                 fullData.dictionary.forEach(dict => {
+                                    // --- Auto PII/SPII Detectors ---
+                                    const piiKeywords = ['นาย', 'นาง', 'ชื่อ', 'นามสกุล', 'name', 'fname', 'lname', 'บัตรประชาชน', 'cid', 'idcard', 'โทรศัพท์', 'เบอร์', 'phone', 'ที่อยู่', 'address', 'อีเมล', 'email', 'อายุ', 'age', 'เพศ', 'gender', 'วันเกิด', 'birth'];
+                                    const spiiKeywords = ['ศาสนา', 'religion', 'กรุ๊ปเลือด', 'blood', 'โรค', 'รหัสผ่าน', 'password', 'ลายนิ้วมือ', 'biometric', 'เชื้อชาติ', 'ประวัติอาชญากรรม', 'พฤติกรรมทางเพศ', 'รสนิยมทางเพศ', 'ความพิการ'];
+                                    const idCardRegex = /13\s*หลัก/i;
+
+                                    // Build text block for searching rules
+                                    let combinedTextForScan = '';
+
                                     // Extract tags from ALL columns in this dictionary row (even hidden ones!)
                                     for (let key in dict) {
                                         if (typeof dict[key] === 'string') {
+                                            combinedTextForScan += dict[key] + ' ';
                                             dict[key] = parseAndCleanRules(dict[key], dict.variable || 'Unknown Field');
                                         }
                                     }
 
+                                    // Check for Privacy Info in the combined text
+                                    const lowerText = combinedTextForScan.toLowerCase();
+                                    let privacyLevel = null;
+                                    if (spiiKeywords.some(kw => lowerText.includes(kw)) || lowerText.includes('sensitive')) {
+                                        privacyLevel = 'SPII';
+                                    } else if (piiKeywords.some(kw => lowerText.includes(kw)) || idCardRegex.test(lowerText) || lowerText.includes('pii')) {
+                                        privacyLevel = 'PII';
+                                    }
+
+                                    // Generate badge and rules
+                                    let privacyBadge = '';
+                                    if (privacyLevel === 'SPII') {
+                                        privacyBadge = `<span class="badge bg-danger ms-2 shadow-sm" title="Sensitive Personal Data" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill"></i> SPII</span>`;
+                                        complianceRules.push({ field: dict.variable || 'Unknown Field', rule: `<span class="text-danger fw-bold">[Auto-Detected] ข้อมูลอ่อนไหว (Sensitive PII) - ต้องเข้ารหัสและจำกัดสิทธิ์การเข้าถึงขั้นสูงสุด!</span>` });
+                                    } else if (privacyLevel === 'PII') {
+                                        privacyBadge = `<span class="badge bg-warning text-dark ms-2 shadow-sm" title="Personal Data" style="font-size: 0.75rem;"><i class="bi bi-person-bounding-box"></i> PII</span>`;
+                                        complianceRules.push({ field: dict.variable || 'Unknown Field', rule: `<span class="text-warning fw-bold" style="color: #fd7e14 !important;">[Auto-Detected] ข้อมูลส่วนบุคคล (PII) - ต้องจัดเก็บและใช้งานตาม พรบ.คุ้มครองข้อมูลส่วนบุคคล</span>` });
+                                    }
+
                                     dictHtml += `
                                         <tr>
-                                            <td class="fw-bold font-monospace text-primary text-nowrap">${dict.variable || '-'}</td>
+                                            <td class="fw-bold font-monospace text-primary text-nowrap">${dict.variable || '-'}${privacyBadge}</td>
                                             <td class="text-center"><span class="badge bg-secondary font-monospace">${dict.type || '-'}</span></td>
                                             <td>${dict.description || '-'}</td>
                                         </tr>
