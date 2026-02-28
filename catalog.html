@@ -799,7 +799,7 @@
                                         let safeText = nodes[i].replace(/[\[\]"']/g, '');
                                         // Highlight the last node (current dataset)
                                         if (i === nodes.length - 1) {
-                                            mermaidCode += `  Node${i}["📌 <b>${safeText}</b>"]:::targetClass;\\n`;
+                                            mermaidCode += `  Node${i}["📌 ${safeText}"]:::targetClass;\\n`;
                                         } else {
                                             mermaidCode += `  Node${i}["${safeText}"];\\n`;
                                         }
