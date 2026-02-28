@@ -805,38 +805,41 @@
                                         nodes.push(targetNode);
                                     }
 
-                                    let mermaidCode = 'graph LR;\\n';
+                                    let htmlContent = '<div class="d-flex align-items-center flex-wrap gap-2 py-3 px-2">';
+
                                     for (let i = 0; i < nodes.length; i++) {
-                                        // Bulletproof cleanup: Replace ALL non-alphanumeric/Thai characters with space 
-                                        // except spaces, parentheses, slashes, commas, dashes, and underscores
-                                        let rawText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
-                                        let safeText = rawText.replace(/[^\\u0E00-\\u0E7Fa-zA-Z0-9\\s()\\/,\\-_]/g, ' ');
-                                        safeText = safeText.replace(/\\s+/g, ' ').trim();
+                                        // Simple text cleanup for UI display (no syntax breaking fears here)
+                                        let displayText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
+                                        if (!displayText) displayText = `Unknown Source ${i}`;
 
-                                        // If empty after cleaning, use a placeholder
-                                        if (safeText === '') safeText = `Unknown ${i}`;
-
+                                        // Highlight the last node (current dataset) differently
                                         if (i === nodes.length - 1) {
-                                            mermaidCode += `  Node${i}["📌 ${safeText}"]:::targetClass;\\n`;
+                                            htmlContent += `
+                                                <div class="p-2 border rounded bg-primary text-white border-primary shadow-sm" style="font-size: 0.9em; max-width: 300px; word-wrap: break-word;">
+                                                    <i class="bi bi-pin-angle-fill me-1"></i>${displayText}
+                                                </div>`;
                                         } else {
-                                            mermaidCode += `  Node${i}["${safeText}"];\\n`;
+                                            htmlContent += `
+                                                <div class="p-2 border rounded bg-light text-dark" style="font-size: 0.9em; max-width: 300px; word-wrap: break-word;">
+                                                    <i class="bi bi-server me-1"></i>${displayText}
+                                                </div>`;
                                         }
 
+                                        // Add arrow if not the last node
                                         if (i < nodes.length - 1) {
-                                            mermaidCode += `  Node${i} --> Node${i + 1};\\n`;
+                                            htmlContent += `
+                                                <div class="text-muted">
+                                                    <i class="bi bi-arrow-right fs-5"></i>
+                                                </div>`;
                                         }
                                     }
-                                    mermaidCode += `  classDef targetClass fill:#e3f2fd,stroke:#0d6efd,stroke-width:2px;`;
+
+                                    htmlContent += '</div>';
 
                                     // Render
-                                    lineageContainer.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
-                                    setTimeout(() => {
-                                        if (window.mermaid) {
-                                            window.mermaid.init(undefined, document.querySelectorAll('.mermaid'));
-                                        }
-                                    }, 100);
-                                } catch (mermaidErr) {
-                                    console.error('Mermaid render error:', mermaidErr);
+                                    lineageContainer.innerHTML = htmlContent;
+                                } catch (err) {
+                                    console.error('Lineage render error:', err);
                                     lineageContainer.classList.add('d-none');
                                     noLineageMsg.style.display = 'block';
                                 }
