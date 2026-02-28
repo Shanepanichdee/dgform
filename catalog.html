@@ -20,6 +20,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+    <!-- Mermaid.js for Data Lineage -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: false, theme: 'default' });</script>
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -765,9 +769,57 @@
                     .then(fullDataResult => {
                         const dictContainer = document.getElementById('dictionaryContainer');
                         const glosContainer = document.getElementById('glossaryContainer');
+                        const lineageContainer = document.getElementById('mermaidGraph');
+                        const noLineageMsg = document.getElementById('noLineageMsg');
 
                         if (fullDataResult.result === 'success' && fullDataResult.data) {
                             const fullData = fullDataResult.data;
+
+                            // --- RENDER DATA LINEAGE ---
+                            lineageContainer.innerHTML = ''; // reset
+
+                            // Check if source contains -> indicating flow
+                            const sourceText = String(fullData.source || '');
+                            if (sourceText.includes('->')) {
+                                noLineageMsg.style.display = 'none';
+                                lineageContainer.classList.remove('d-none');
+
+                                const nodes = sourceText.split('->').map(s => s.trim()).filter(s => s !== '');
+                                // Always append the current dataset at the end to complete the flow visually
+                                const targetNode = fullData.title || fullData.datasetId || 'Current Dataset';
+
+                                if (!nodes[nodes.length - 1].toLowerCase().includes(targetNode.toLowerCase())) {
+                                    nodes.push(targetNode);
+                                }
+
+                                let mermaidCode = 'graph LR;\\n';
+                                for (let i = 0; i < nodes.length; i++) {
+                                    // Clean text for Mermaid (remove quotes/brackets)
+                                    let safeText = nodes[i].replace(/[\[\]"']/g, '');
+                                    // Highlight the last node (current dataset)
+                                    if (i === nodes.length - 1) {
+                                        mermaidCode += `  Node${i}["📌 <b>${safeText}</b>"]:::targetClass;\\n`;
+                                    } else {
+                                        mermaidCode += `  Node${i}["${safeText}"];\\n`;
+                                    }
+
+                                    if (i < nodes.length - 1) {
+                                        mermaidCode += `  Node${i} --> Node${i + 1};\\n`;
+                                    }
+                                }
+                                // Add custom styling class for target
+                                mermaidCode += `  classDef targetClass fill:#e3f2fd,stroke:#0d6efd,stroke-width:2px;`;
+
+                                // Inject into DOM and render
+                                lineageContainer.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
+                                // Tell mermaid to parse and draw the newly injected div
+                                setTimeout(() => {
+                                    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+                                }, 100);
+                            } else {
+                                lineageContainer.classList.add('d-none');
+                                noLineageMsg.style.display = 'block';
+                            }
 
                             // Render Data Dictionary if exists
                             if (fullData.dictionary && fullData.dictionary.length > 0) {
