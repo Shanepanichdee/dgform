@@ -775,6 +775,11 @@
                         if (fullDataResult.result === 'success' && fullDataResult.data) {
                             const fullData = fullDataResult.data;
 
+                            // Initialize Arrays for Data Quality & Compliance Rules inside this fetch scope
+                            let semanticRules = [];
+                            let businessRules = [];
+                            let complianceRules = [];
+
                             // --- RENDER DATA LINEAGE ---
                             lineageContainer.innerHTML = ''; // reset
 
