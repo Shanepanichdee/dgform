@@ -805,7 +805,29 @@
                                         nodes.push(targetNode);
                                     }
 
-                                    let htmlContent = '<div class="d-flex align-items-center flex-wrap gap-2 py-3 px-2">';
+                                    let htmlContent = `
+                                        <style>
+                                            @keyframes lineageArrowMove {
+                                                0% { transform: translateX(0); opacity: 0.5; }
+                                                50% { transform: translateX(6px); opacity: 1; text-shadow: 0 0 4px rgba(13,110,253,0.4); }
+                                                100% { transform: translateX(0); opacity: 0.5; }
+                                            }
+                                            .animated-lineage-arrow {
+                                                animation: lineageArrowMove 1.5s infinite ease-in-out;
+                                                display: inline-block;
+                                                color: #0d6efd;
+                                            }
+                                            .lineage-scroll-box {
+                                                overflow-x: auto;
+                                                overflow-y: hidden;
+                                                padding-bottom: 8px;
+                                                width: 100%;
+                                            }
+                                            .lineage-scroll-box::-webkit-scrollbar { height: 6px; }
+                                            .lineage-scroll-box::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
+                                        </style>
+                                        <div class="d-flex align-items-center flex-nowrap gap-3 py-3 px-2 lineage-scroll-box">
+                                    `;
 
                                     for (let i = 0; i < nodes.length; i++) {
                                         // Simple text cleanup for UI display (no syntax breaking fears here)
@@ -815,12 +837,12 @@
                                         // Highlight the last node (current dataset) differently
                                         if (i === nodes.length - 1) {
                                             htmlContent += `
-                                                <div class="p-2 border rounded bg-primary text-white border-primary shadow-sm" style="font-size: 0.9em; max-width: 300px; word-wrap: break-word;">
+                                                <div class="p-2 border rounded bg-primary text-white border-primary shadow-sm flex-shrink-0" style="font-size: 0.9em; max-width: 320px; white-space: normal;">
                                                     <i class="bi bi-pin-angle-fill me-1"></i>${displayText}
                                                 </div>`;
                                         } else {
                                             htmlContent += `
-                                                <div class="p-2 border rounded bg-light text-dark" style="font-size: 0.9em; max-width: 300px; word-wrap: break-word;">
+                                                <div class="p-2 border rounded bg-light text-dark flex-shrink-0" style="font-size: 0.9em; max-width: 320px; white-space: normal;">
                                                     <i class="bi bi-server me-1"></i>${displayText}
                                                 </div>`;
                                         }
@@ -828,8 +850,8 @@
                                         // Add arrow if not the last node
                                         if (i < nodes.length - 1) {
                                             htmlContent += `
-                                                <div class="text-muted">
-                                                    <i class="bi bi-arrow-right fs-5"></i>
+                                                <div class="text-primary flex-shrink-0 mx-2">
+                                                    <i class="bi bi-arrow-right fs-4 animated-lineage-arrow"></i>
                                                 </div>`;
                                         }
                                     }
