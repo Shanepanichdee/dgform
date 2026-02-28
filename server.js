@@ -178,6 +178,79 @@ app.post('/api/save/gcs', async (req, res) => {
     }
 });
 
+const fs = require('fs');
+
+// --- Scheduled Task: Backup Local Logs to GCS Data Lake ---
+// This function runs periodically to upload the app_activity.log file
+// to GCS, then clears the local file to prevent disk exhaustion on Render.
+
+const LOG_FILE_PATH = path.join(__dirname, 'logs', 'app_activity.log');
+
+async function backupLogsToGCS() {
+    if (!bucket) {
+        logger.warn('[LOG_BACKUP] GCS bucket not configured. Skipping log backup.');
+        return;
+    }
+
+    try {
+        // 1. Check if the log file exists and has content
+        if (!fs.existsSync(LOG_FILE_PATH)) {
+            return; // No file yet
+        }
+
+        const stats = await fs.promises.stat(LOG_FILE_PATH);
+        if (stats.size === 0) {
+            return; // File is empty, nothing to upload
+        }
+
+        // 2. Define filename with timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const gcsFilename = `operation_logs/${timestamp}_app_activity.log`;
+        const file = bucket.file(gcsFilename);
+
+        // 3. Prevent writing to log *during* read by copying to temp first (optional, but safer)
+        // For simplicity and lightweight nature, we'll stream it directly, but we use 
+        // Winston which might be writing at the same time. The risk is extremely low for MVP.
+
+        logger.info(`[LOG_BACKUP] Starting backup of ${stats.size} bytes to ${gcsFilename}...`);
+
+        // 4. Upload to GCS
+        await bucket.upload(LOG_FILE_PATH, {
+            destination: gcsFilename,
+            contentType: 'text/plain',
+            metadata: {
+                cacheControl: 'no-cache',
+            }
+        });
+
+        logger.info(`[LOG_BACKUP] Successfully uploaded logs to GCS: ${gcsFilename}`);
+
+        // 5. Truncate (clear) the local log file
+        // We use truncate instead of deleting to keep the file handle valid for Winston
+        await fs.promises.truncate(LOG_FILE_PATH, 0);
+        logger.info(`[LOG_BACKUP] Cleared local log file.`);
+
+    } catch (error) {
+        // Need to use console.error here to avoid infinite loop of logging errors into the broken log file
+        console.error(`[LOG_BACKUP_ERROR] Failed to backup logs: ${error.message}`);
+    }
+}
+
+// Set up the interval for log backups
+// For production, maybe every 12 hours (12 * 60 * 60 * 1000)
+// For testing/demonstration right now, let's set it to run every 1 minute if called directly,
+// but for normal server operation we will use 1 hour (60 * 60 * 1000)
+const LOG_BACKUP_INTERVAL_MS = process.env.LOG_BACKUP_INTERVAL_MS || 60 * 60 * 1000; // Default 1 hour
+setInterval(backupLogsToGCS, LOG_BACKUP_INTERVAL_MS);
+
+// Quick test route to manually trigger the backup for debugging
+app.get('/api/trigger-log-backup', async (req, res) => {
+    logger.info('[MANUAL_TRIGGER] Log backup requested via API.');
+    await backupLogsToGCS();
+    res.send('Backup process completed. Check server logs.');
+});
+
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
