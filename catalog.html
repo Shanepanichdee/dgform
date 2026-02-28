@@ -790,12 +790,14 @@
 
                             // Check if source contains -> indicating flow
                             const sourceText = String(fullData.source || '');
-                            if (sourceText.includes('->')) {
+                            // Support ->, =>, and — (em-dash)
+                            if (sourceText.includes('->') || sourceText.includes('=>') || sourceText.includes('—')) {
                                 noLineageMsg.style.display = 'none';
                                 lineageContainer.classList.remove('d-none');
 
                                 try {
-                                    const nodes = sourceText.split('->').map(s => s.trim()).filter(s => s !== '');
+                                    // Split by any of the supported delimiters
+                                    const nodes = sourceText.split(/->|=>|—/).map(s => s.trim()).filter(s => s !== '');
 
                                     const targetNode = fullData.title ? fullData.title.trim() : 'Current Dataset';
 
@@ -805,14 +807,11 @@
 
                                     let mermaidCode = 'graph LR;\\n';
                                     for (let i = 0; i < nodes.length; i++) {
-                                        // Final absolute safe text cleanup for Mermaid Node Labels:
-                                        // ONLY replace characters that strictly break Mermaid's ["..."] syntax or flow grammar.
+                                        // Bulletproof cleanup: Replace ALL non-alphanumeric/Thai characters with space 
+                                        // except spaces, parentheses, slashes, commas, dashes, and underscores
                                         let rawText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
-
-                                        // Remove double/single quotes as they break the bounding [" "]
-                                        // Remove angle brackets < > which Mermaid tries to parse as HTML tags
-                                        // Remove curly braces { } and square brackets [ ] which interfere with shapes
-                                        let safeText = rawText.replace(/["'<>\\{\\}\\[\\]]/g, '');
+                                        let safeText = rawText.replace(/[^\\u0E00-\\u0E7Fa-zA-Z0-9\\s()\\/,\\-_]/g, ' ');
+                                        safeText = safeText.replace(/\\s+/g, ' ').trim();
 
                                         // If empty after cleaning, use a placeholder
                                         if (safeText === '') safeText = `Unknown ${i}`;
