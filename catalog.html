@@ -711,6 +711,13 @@
                         </div>
                     </div>
 
+                    <!-- 🔀 DATA LINEAGE SECTION (Visualized in JS from 'source' column) -->
+                    <h6 class="fw-bold text-secondary border-bottom pb-2 mt-4 mb-3"><i class="bi bi-diagram-3-fill me-2"></i>เส้นทางสายข้อมูล (Data Lineage)</h6>
+                    <div id="noLineageMsg" class="alert alert-light border border-secondary text-secondary py-2" style="display: none;"><i class="bi bi-info-circle me-2"></i>ไม่พบข้อมูลเส้นทางข้อมูล (Data Lineage) สำหรับชุดข้อมูลนี้</div>
+                    <div id="mermaidGraph" class="p-4 bg-light rounded-3 border mb-4 d-none text-center" style="overflow-x: auto; min-height: 100px;">
+                         <div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+
                     <!-- Dictionary Placeholder inside Technical Section -->
                     <div id="dictionaryContainer" class="mt-2">
                         <div class="text-center text-muted small"><div class="spinner-border spinner-border-sm me-1" role="status"></div> กำลังโหลดพจนานุกรมข้อมูล...</div>
