@@ -783,9 +783,7 @@
                             const fullData = fullDataResult.data;
 
                             // Initialize Arrays for Data Quality & Compliance Rules inside this fetch scope
-                            let semanticRules = [];
-                            let businessRules = [];
-                            let complianceRules = [];
+                            // (Arrays already declared at the top of viewDataset block, so we just use them)
 
                             // --- RENDER DATA LINEAGE ---
                             lineageContainer.innerHTML = ''; // reset
@@ -807,8 +805,8 @@
 
                                     let mermaidCode = 'graph LR;\\n';
                                     for (let i = 0; i < nodes.length; i++) {
-                                        // Clean text for Mermaid (remove quotes/brackets)
-                                        let safeText = nodes[i].replace(/[\[\]"']/g, '');
+                                        // Clean text for Mermaid (remove quotes/brackets and special chars that break aliases)
+                                        let safeText = nodes[i].replace(/["'(){}\\[\\]|<>]/g, '').trim();
                                         // Highlight the last node (current dataset)
                                         if (i === nodes.length - 1) {
                                             mermaidCode += `  Node${i}["📌 ${safeText}"]:::targetClass;\\n`;
