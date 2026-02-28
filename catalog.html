@@ -796,8 +796,8 @@
 
                                 try {
                                     const nodes = sourceText.split('->').map(s => s.trim()).filter(s => s !== '');
-                                    // Always append the current dataset at the end to complete the flow visually
-                                    const targetNode = fullData.title || 'Current Dataset';
+
+                                    const targetNode = fullData.title ? fullData.title.trim() : 'Current Dataset';
 
                                     if (!nodes[nodes.length - 1].toLowerCase().includes(targetNode.toLowerCase())) {
                                         nodes.push(targetNode);
@@ -805,27 +805,18 @@
 
                                     let mermaidCode = 'graph LR;\\n';
                                     for (let i = 0; i < nodes.length; i++) {
-                                        // Bullet-proof text cleaning for Mermaid: 
-                                        let tempText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
-                                        // Replace dangerous characters with visually similar safe characters
-                                        // " -> ''
-                                        // ( -> （
-                                        // ) -> ）
-                                        // / -> ／
-                                        // | -> ขีดกลาง
-                                        let safeText = tempText
-                                            .replace(/["']/g, '')
-                                            .replace(/[\\(]/g, '（')
-                                            .replace(/[\\)]/g, '）')
-                                            .replace(/[\\/]/g, '／')
-                                            .replace(/[|]/g, '-')
-                                            .replace(/[<>\\{\\}\\[\\]]/g, '');
+                                        // Final absolute safe text cleanup for Mermaid Node Labels:
+                                        // ONLY replace characters that strictly break Mermaid's ["..."] syntax or flow grammar.
+                                        let rawText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
 
-                                        // Guarantee no empty nodes
-                                        if (!safeText || safeText.trim() === '') safeText = `Nodes ${i}`;
-                                        else safeText = safeText.trim();
+                                        // Remove double/single quotes as they break the bounding [" "]
+                                        // Remove angle brackets < > which Mermaid tries to parse as HTML tags
+                                        // Remove curly braces { } and square brackets [ ] which interfere with shapes
+                                        let safeText = rawText.replace(/["'<>\\{\\}\\[\\]]/g, '');
 
-                                        // Highlight the last node (current dataset)
+                                        // If empty after cleaning, use a placeholder
+                                        if (safeText === '') safeText = `Unknown ${i}`;
+
                                         if (i === nodes.length - 1) {
                                             mermaidCode += `  Node${i}["📌 ${safeText}"]:::targetClass;\\n`;
                                         } else {
@@ -836,12 +827,10 @@
                                             mermaidCode += `  Node${i} --> Node${i + 1};\\n`;
                                         }
                                     }
-                                    // Add custom styling class for target
                                     mermaidCode += `  classDef targetClass fill:#e3f2fd,stroke:#0d6efd,stroke-width:2px;`;
 
-                                    // Inject into DOM and render
+                                    // Render
                                     lineageContainer.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
-                                    // Tell mermaid to parse and draw the newly injected div
                                     setTimeout(() => {
                                         if (window.mermaid) {
                                             window.mermaid.init(undefined, document.querySelectorAll('.mermaid'));
