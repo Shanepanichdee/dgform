@@ -805,8 +805,12 @@
 
                                     let mermaidCode = 'graph LR;\\n';
                                     for (let i = 0; i < nodes.length; i++) {
-                                        // Clean text for Mermaid (remove quotes/brackets and special chars that break aliases)
-                                        let safeText = nodes[i].replace(/["'(){}\\[\\]|<>]/g, '').trim();
+                                        // Bullet-proof text cleaning for Mermaid: 
+                                        // 1. Remove newlines/carriage returns
+                                        // 2. Allow only Thai letters, English letters, Numbers, Space, -, _
+                                        let tempText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
+                                        let safeText = tempText.replace(/[^ก-๙a-zA-Z0-9 \\-_]/g, ' ').trim();
+
                                         // Highlight the last node (current dataset)
                                         if (i === nodes.length - 1) {
                                             mermaidCode += `  Node${i}["📌 ${safeText}"]:::targetClass;\\n`;
