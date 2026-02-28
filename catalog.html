@@ -784,38 +784,46 @@
                                 noLineageMsg.style.display = 'none';
                                 lineageContainer.classList.remove('d-none');
 
-                                const nodes = sourceText.split('->').map(s => s.trim()).filter(s => s !== '');
-                                // Always append the current dataset at the end to complete the flow visually
-                                const targetNode = fullData.title || fullData.datasetId || 'Current Dataset';
+                                try {
+                                    const nodes = sourceText.split('->').map(s => s.trim()).filter(s => s !== '');
+                                    // Always append the current dataset at the end to complete the flow visually
+                                    const targetNode = fullData.title || 'Current Dataset';
 
-                                if (!nodes[nodes.length - 1].toLowerCase().includes(targetNode.toLowerCase())) {
-                                    nodes.push(targetNode);
-                                }
-
-                                let mermaidCode = 'graph LR;\\n';
-                                for (let i = 0; i < nodes.length; i++) {
-                                    // Clean text for Mermaid (remove quotes/brackets)
-                                    let safeText = nodes[i].replace(/[\[\]"']/g, '');
-                                    // Highlight the last node (current dataset)
-                                    if (i === nodes.length - 1) {
-                                        mermaidCode += `  Node${i}["📌 <b>${safeText}</b>"]:::targetClass;\\n`;
-                                    } else {
-                                        mermaidCode += `  Node${i}["${safeText}"];\\n`;
+                                    if (!nodes[nodes.length - 1].toLowerCase().includes(targetNode.toLowerCase())) {
+                                        nodes.push(targetNode);
                                     }
 
-                                    if (i < nodes.length - 1) {
-                                        mermaidCode += `  Node${i} --> Node${i + 1};\\n`;
-                                    }
-                                }
-                                // Add custom styling class for target
-                                mermaidCode += `  classDef targetClass fill:#e3f2fd,stroke:#0d6efd,stroke-width:2px;`;
+                                    let mermaidCode = 'graph LR;\\n';
+                                    for (let i = 0; i < nodes.length; i++) {
+                                        // Clean text for Mermaid (remove quotes/brackets)
+                                        let safeText = nodes[i].replace(/[\[\]"']/g, '');
+                                        // Highlight the last node (current dataset)
+                                        if (i === nodes.length - 1) {
+                                            mermaidCode += `  Node${i}["📌 <b>${safeText}</b>"]:::targetClass;\\n`;
+                                        } else {
+                                            mermaidCode += `  Node${i}["${safeText}"];\\n`;
+                                        }
 
-                                // Inject into DOM and render
-                                lineageContainer.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
-                                // Tell mermaid to parse and draw the newly injected div
-                                setTimeout(() => {
-                                    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
-                                }, 100);
+                                        if (i < nodes.length - 1) {
+                                            mermaidCode += `  Node${i} --> Node${i + 1};\\n`;
+                                        }
+                                    }
+                                    // Add custom styling class for target
+                                    mermaidCode += `  classDef targetClass fill:#e3f2fd,stroke:#0d6efd,stroke-width:2px;`;
+
+                                    // Inject into DOM and render
+                                    lineageContainer.innerHTML = `<div class="mermaid">${mermaidCode}</div>`;
+                                    // Tell mermaid to parse and draw the newly injected div
+                                    setTimeout(() => {
+                                        if (window.mermaid) {
+                                            window.mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+                                        }
+                                    }, 100);
+                                } catch (mermaidErr) {
+                                    console.error('Mermaid render error:', mermaidErr);
+                                    lineageContainer.classList.add('d-none');
+                                    noLineageMsg.style.display = 'block';
+                                }
                             } else {
                                 lineageContainer.classList.add('d-none');
                                 noLineageMsg.style.display = 'block';
