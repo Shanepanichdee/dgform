@@ -806,10 +806,24 @@
                                     let mermaidCode = 'graph LR;\\n';
                                     for (let i = 0; i < nodes.length; i++) {
                                         // Bullet-proof text cleaning for Mermaid: 
-                                        // 1. Remove newlines/carriage returns
-                                        // 2. Allow only Thai letters, English letters, Numbers, Space, -, _
                                         let tempText = nodes[i].replace(/[\\r\\n\\t]+/g, ' ').trim();
-                                        let safeText = tempText.replace(/[^ก-๙a-zA-Z0-9 \\-_]/g, ' ').trim();
+                                        // Replace dangerous characters with visually similar safe characters
+                                        // " -> ''
+                                        // ( -> （
+                                        // ) -> ）
+                                        // / -> ／
+                                        // | -> ขีดกลาง
+                                        let safeText = tempText
+                                            .replace(/["']/g, '')
+                                            .replace(/[\\(]/g, '（')
+                                            .replace(/[\\)]/g, '）')
+                                            .replace(/[\\/]/g, '／')
+                                            .replace(/[|]/g, '-')
+                                            .replace(/[<>\\{\\}\\[\\]]/g, '');
+
+                                        // Guarantee no empty nodes
+                                        if (!safeText || safeText.trim() === '') safeText = `Nodes ${i}`;
+                                        else safeText = safeText.trim();
 
                                         // Highlight the last node (current dataset)
                                         if (i === nodes.length - 1) {
