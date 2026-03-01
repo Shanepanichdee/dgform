@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const { Storage } = require('@google-cloud/storage');
 const winston = require('winston');
 const path = require('path');
@@ -33,9 +34,23 @@ app.use(bodyParser.json({ limit: '50mb' })); // Increase limit for large metadat
 // ---------------------------------------------------------
 // MongoDB Setup
 // ---------------------------------------------------------
-// Simple Schema for generic metadata storage
 const metadataSchema = new mongoose.Schema({}, { strict: false, timestamps: true });
 const Metadata = mongoose.model('Metadata', metadataSchema);
+
+// Schema for DG Masterclass Authentication
+const userSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
+}, { timestamps: true });
+const User = mongoose.model('User', userSchema);
+
+// Schema for DG Masterclass App Logging
+const appLogSchema = new mongoose.Schema({
+    email: { type: String, required: true },
+    action: { type: String, required: true }, // e.g., 'View_Chapter_1', 'Login'
+    timestamp: { type: Date, default: Date.now }
+});
+const AppLog = mongoose.model('AppLog', appLogSchema);
 
 const connectDB = async () => {
     try {
@@ -72,20 +87,83 @@ if (process.env.GCS_KEY_FILE_PATH && process.env.GCS_BUCKET_NAME) {
 // API Endpoints
 // ---------------------------------------------------------
 
-// --- Authentication (Login) ---
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
+// --- Authentication (Login/Register) ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ success: false, message: 'กรุณากรอก Email และ Password' });
 
-    // Default credentials if not set in .env
-    const validUser = process.env.ADMIN_USERNAME || 'admin';
-    const validPass = process.env.ADMIN_PASSWORD || 'password@123';
+        const isMongoConnected = mongoose.connection.readyState === 1;
+        if (!isMongoConnected) return res.status(503).json({ success: false, message: 'ระบบฐานข้อมูลยังไม่พร้อมใช้งาน' });
 
-    if (username === validUser && password === validPass) {
-        logger.info(`[AUTH] Login successful for user: ${username}`);
-        res.status(200).json({ success: true, message: 'Login successful' });
-    } else {
-        logger.warn(`[AUTH] Failed login attempt for user: ${username}`);
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ success: false, message: 'Email นี้ถูกใช้งานแล้ว' });
+
+        // Hash Password before saving
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = new User({ email, password: hashedPassword });
+        await newUser.save();
+
+        logger.info(`[AUTH] Register successful for user: ${email}`);
+        res.status(201).json({ success: true, message: 'ลงทะเบียนสำเร็จ' });
+    } catch (error) {
+        logger.error(`[AUTH_ERROR] Register failed: ${error.message}`);
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดทางการประมวลผลเซิร์ฟเวอร์' });
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ success: false, message: 'กรุณากรอก Email และ Password' });
+
+        const isMongoConnected = mongoose.connection.readyState === 1;
+        if (!isMongoConnected) return res.status(503).json({ success: false, message: 'ระบบฐานข้อมูลยังไม่พร้อมใช้งาน' });
+
+        // Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            logger.warn(`[AUTH] Failed login (user not found): ${email}`);
+            return res.status(401).json({ success: false, message: 'ไม่พบผู้ใช้นี้ หรือรหัสผ่านไม่ถูกต้อง' });
+        }
+
+        // Compare password and hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            logger.warn(`[AUTH] Failed login (password mismatch): ${email}`);
+            return res.status(401).json({ success: false, message: 'ไม่พบผู้ใช้นี้ หรือรหัสผ่านไม่ถูกต้อง' });
+        }
+
+        // Add to App Log
+        await AppLog.create({ email, action: 'Login' });
+        logger.info(`[AUTH] Login successful for user: ${email}`);
+
+        res.status(200).json({ success: true, message: 'Login successful', email: user.email });
+    } catch (error) {
+        logger.error(`[AUTH_ERROR] Login failed: ${error.message}`);
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดทางการประมวลผลเซิร์ฟเวอร์' });
+    }
+});
+
+// --- Activity Logging ---
+app.post('/api/log', async (req, res) => {
+    try {
+        const { email, action } = req.body;
+        if (!email || !action) return res.status(400).json({ success: false, message: 'Missing email or action' });
+
+        const isMongoConnected = mongoose.connection.readyState === 1;
+        if (isMongoConnected) {
+            await AppLog.create({ email, action });
+            logger.info(`[APP_LOG] User: ${email} | Action: ${action}`);
+        } else {
+            logger.warn(`[APP_LOG_LOCAL] User: ${email} | Action: ${action} (MongoDB offline)`);
+        }
+        res.status(200).json({ success: true });
+    } catch (error) {
+        logger.error(`[APP_LOG_ERROR] Logging failed: ${error.message}`);
+        res.status(500).json({ success: false, message: 'Failed to record log' });
     }
 });
 
