@@ -154,13 +154,18 @@ app.post('/api/log', async (req, res) => {
         if (!email || !action) return res.status(400).json({ success: false, message: 'Missing email or action' });
 
         const isMongoConnected = mongoose.connection.readyState === 1;
+        let createdLog = null;
         if (isMongoConnected) {
-            await AppLog.create({ email, action });
+            createdLog = await AppLog.create({ email, action });
             logger.info(`[APP_LOG] User: ${email} | Action: ${action}`);
         } else {
             logger.warn(`[APP_LOG_LOCAL] User: ${email} | Action: ${action} (MongoDB offline)`);
         }
-        res.status(200).json({ success: true });
+        res.status(200).json({
+            success: true,
+            mongoConnected: isMongoConnected,
+            logId: createdLog?._id ?? null
+        });
     } catch (error) {
         logger.error(`[APP_LOG_ERROR] Logging failed: ${error.message}`);
         res.status(500).json({ success: false, message: 'Failed to record log' });
