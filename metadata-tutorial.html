@@ -1063,7 +1063,8 @@
                                 const headers = Array.from(document.querySelectorAll('#glossaryTable thead th'));
                                 const keyIndex = headers.findIndex(th => th.getAttribute('data-key') === key);
                                 if (keyIndex !== -1 && item[key] !== undefined) {
-                                    const td = tr.children[keyIndex];
+                                    const cells = tr.querySelectorAll('td');
+                                    const td = cells[keyIndex];
                                     if (td) {
                                         const input = td.querySelector('input');
                                         if (input) input.value = item[key];
@@ -1116,7 +1117,8 @@
                                 const headers = Array.from(document.querySelectorAll('#dictTable thead th'));
                                 const keyIndex = headers.findIndex(th => th.getAttribute('data-key') === key);
                                 if (keyIndex !== -1 && item[key] !== undefined) {
-                                    const td = tr.children[keyIndex];
+                                    const cells = tr.querySelectorAll('td');
+                                    const td = cells[keyIndex];
                                     if (td) {
                                         const input = td.querySelector('input');
                                         if (input) input.value = item[key];
@@ -1389,8 +1391,8 @@
                 headers.forEach((th, index) => {
                     const key = th.getAttribute('data-key');
                     if (key) {
-                        const input = cells[index].querySelector('input, select, textarea');
-                        if (input && input.value) item[key] = input.value.trim();
+                        const input = cells[index] ? cells[index].querySelector('input, select, textarea') : null;
+                        if (input && input.value !== '') item[key] = input.value.trim();
                     }
                 });
                 if (item.term) data.glossary.push(item);
@@ -1407,8 +1409,8 @@
                 headers.forEach((th, index) => {
                     const key = th.getAttribute('data-key');
                     if (key) {
-                        const input = cells[index].querySelector('input, select, textarea');
-                        if (input && input.value) item[key] = input.value.trim();
+                        const input = cells[index] ? cells[index].querySelector('input, select, textarea') : null;
+                        if (input && input.value !== '') item[key] = input.value.trim();
                     }
                 });
                 if (item.variable) data.dictionary.push(item);
