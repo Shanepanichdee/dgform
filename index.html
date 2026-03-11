@@ -6,6 +6,8 @@
         if (!localStorage.getItem('isLoggedIn') && !window.location.href.includes('login.html') && !window.location.href.includes('splash.html')) {
             window.location.href = 'login.html' + window.location.search;
         }
+        // Security: ป้องกัน Clickjacking — ถ้าถูกโหลดใน iframe ให้ redirect ออกทันที
+        if (window.top !== window.self) { window.top.location = window.self.location; }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
