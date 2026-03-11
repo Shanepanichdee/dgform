@@ -70,7 +70,7 @@ if (data.action === 'login') {
 function loadConfig() {
     const shortcodes = {
         'dla2': {
-            agency: 'กรมส่งเสริมการปกครองส่วนท้องถิ่น กระทรวงมหาดไทย',
+            agency: 'กรมส่งเสริมการปกครองท้องถิ่น กระทรวงมหาดไทย',
             url: 'https://script.google.com/macros/s/... (URL ของ dla2) .../exec'
         },
         'diw2': {
