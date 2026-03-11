@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { Pool } = require('pg');
 const { Storage } = require('@google-cloud/storage');
 const winston = require('winston');
 const path = require('path');
@@ -27,8 +28,94 @@ const logger = winston.createLogger({
     ],
 });
 
-// Middleware
-app.use(cors());
+// ---------------------------------------------------------
+// Security: CORS Whitelist
+// ---------------------------------------------------------
+const ALLOWED_ORIGINS = [
+    'https://shanepanichdee.github.io',
+    'http://localhost:3000',
+    'http://localhost:5173' // Vite dev server (dg-change-management)
+];
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (e.g. curl, Postman, server-to-server)
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            return callback(null, true);
+        }
+        logger.warn(`[CORS] Blocked request from disallowed origin: ${origin}`);
+        return callback(new Error('CORS policy: origin not allowed'), false);
+    },
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// ---------------------------------------------------------
+// Security: Manual Security Headers (helmet equivalent)
+// ---------------------------------------------------------
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none';"
+    );
+    res.removeHeader('X-Powered-By');
+    next();
+});
+
+// ---------------------------------------------------------
+// Security: In-Memory Rate Limiter (no external package needed)
+// ---------------------------------------------------------
+const rateLimitStore = new Map();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX = 10; // max 10 attempts per window
+
+function rateLimiter(req, res, next) {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const key = `${ip}:${req.path}`;
+
+    if (!rateLimitStore.has(key)) {
+        rateLimitStore.set(key, { count: 1, windowStart: now });
+        return next();
+    }
+
+    const record = rateLimitStore.get(key);
+
+    // Reset window if expired
+    if (now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
+        rateLimitStore.set(key, { count: 1, windowStart: now });
+        return next();
+    }
+
+    record.count += 1;
+    if (record.count > RATE_LIMIT_MAX) {
+        const retryAfterSec = Math.ceil((RATE_LIMIT_WINDOW_MS - (now - record.windowStart)) / 1000);
+        logger.warn(`[RATE_LIMIT] Blocked ${ip} on ${req.path} (${record.count} attempts)`);
+        res.setHeader('Retry-After', retryAfterSec);
+        return res.status(429).json({
+            success: false,
+            message: `พยายาม login มากเกินไป กรุณารอ ${Math.ceil(retryAfterSec / 60)} นาที`
+        });
+    }
+
+    next();
+}
+
+// Clean up expired entries every 30 minutes to prevent memory leak
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of rateLimitStore.entries()) {
+        if (now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
+            rateLimitStore.delete(key);
+        }
+    }
+}, 30 * 60 * 1000);
+
 app.use(bodyParser.json({ limit: '50mb' })); // Increase limit for large metadata
 
 // ---------------------------------------------------------
@@ -70,6 +157,40 @@ const connectDB = async () => {
 connectDB();
 
 // ---------------------------------------------------------
+// PostgreSQL (Supabase) Setup (DISABLED TEMPORARILY)
+// ---------------------------------------------------------
+let pgPool;
+if (false /* process.env.DATABASE_URL */) { // 🛑 ปิดการเชื่อมต่อ Supabase ไว้ชั่วคราวเพื่อป้องกันระบบรวน 
+    pgPool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+
+    const initPostgresDB = async () => {
+        try {
+            await pgPool.query(`
+                CREATE TABLE IF NOT EXISTS dg_metadata (
+                    id SERIAL PRIMARY KEY,
+                    dataset_id VARCHAR(255) UNIQUE,
+                    domain VARCHAR(255),
+                    title VARCHAR(255),
+                    submitter_agency VARCHAR(255),
+                    payload JSONB,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+            console.log('✅ Connected to PostgreSQL (Supabase)');
+        } catch (err) {
+            console.error('❌ PostgreSQL Connection Error:', err.message);
+        }
+    };
+    initPostgresDB();
+} else {
+    console.log('⚠️ PostgreSQL (Supabase) features are explicitly DISABLED.');
+}
+
+// ---------------------------------------------------------
 // Google Cloud Storage Setup
 // ---------------------------------------------------------
 let storage;
@@ -88,7 +209,7 @@ if (process.env.GCS_KEY_FILE_PATH && process.env.GCS_BUCKET_NAME) {
 // ---------------------------------------------------------
 
 // --- Authentication (Login/Register) ---
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', rateLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ success: false, message: 'กรุณากรอก Email และ Password' });
@@ -114,7 +235,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', rateLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ success: false, message: 'กรุณากรอก Email และ Password' });
@@ -210,7 +331,22 @@ app.post('/api/save/mongodb', async (req, res) => {
                 await existingRecord.save();
 
                 logger.info(`[MONGODB_UPDATE] Updated document ID: ${existingRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
-                return res.status(200).json({ message: 'Updated Local Log and MongoDB successfully', id: existingRecord._id });
+
+                // Update in PostgreSQL
+                if (pgPool) {
+                    try {
+                        const datasetId = data.datasetId || existingRecord._id.toString();
+                        await pgPool.query(
+                            `UPDATE dg_metadata SET payload = $1, domain = $2, title = $3, submitter_agency = $4, updated_at = CURRENT_TIMESTAMP WHERE dataset_id = $5 OR (title = $3 AND submitter_agency = $4)`,
+                            [data, data.domain, data.title, data.submitterAgency, datasetId]
+                        );
+                        logger.info(`[POSTGRES_UPDATE] Updated record in Supabase`);
+                    } catch (pgErr) {
+                        logger.error(`[POSTGRES_UPDATE_ERROR] ${pgErr.message}`);
+                    }
+                }
+
+                return res.status(200).json({ message: 'Updated Local Log, MongoDB, and Postgres successfully', id: existingRecord._id });
             }
             // If not found at all, it will fall through to insertion below
         }
@@ -220,7 +356,24 @@ app.post('/api/save/mongodb', async (req, res) => {
         await newRecord.save();
 
         logger.info(`[MONGODB_INSERT] Saved new document ID: ${newRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
-        res.status(200).json({ message: 'Saved to Local Log and MongoDB successfully', id: newRecord._id });
+
+        // Insert into PostgreSQL
+        if (pgPool) {
+            try {
+                const datasetId = data.datasetId || newRecord._id.toString();
+                data.datasetId = datasetId; // ensure payload has it
+                await pgPool.query(
+                    `INSERT INTO dg_metadata (dataset_id, domain, title, submitter_agency, payload) VALUES ($1, $2, $3, $4, $5)
+                     ON CONFLICT (dataset_id) DO UPDATE SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP`,
+                    [datasetId, data.domain, data.title, data.submitterAgency, data]
+                );
+                logger.info(`[POSTGRES_INSERT] Saved new record in Supabase`);
+            } catch (pgErr) {
+                logger.error(`[POSTGRES_INSERT_ERROR] ${pgErr.message}`);
+            }
+        }
+
+        res.status(200).json({ message: 'Saved to Local Log, MongoDB, and Postgres successfully', id: newRecord._id });
     } catch (error) {
         logger.error(`[SAVE_ERROR] Failed to save/update: ${error.message}`);
         res.status(500).json({ error: 'Failed to process data in MongoDB' });
@@ -325,6 +478,27 @@ async function backupLogsToGCS() {
 // but for normal server operation we will use 1 hour (60 * 60 * 1000)
 const LOG_BACKUP_INTERVAL_MS = process.env.LOG_BACKUP_INTERVAL_MS || 60 * 60 * 1000; // Default 1 hour
 setInterval(backupLogsToGCS, LOG_BACKUP_INTERVAL_MS);
+
+// --- Edit Password Verification (Server-side) ---
+app.post('/api/verify-edit', rateLimiter, (req, res) => {
+    const { password } = req.body;
+    const editPassword = process.env.EDIT_PASSWORD;
+
+    if (!editPassword) {
+        logger.error('[VERIFY_EDIT] EDIT_PASSWORD not set in environment');
+        return res.status(500).json({ success: false, message: 'Server configuration error' });
+    }
+    if (!password) {
+        return res.status(400).json({ success: false, message: 'Password required' });
+    }
+    if (password !== editPassword) {
+        logger.warn(`[VERIFY_EDIT] Failed attempt from IP: ${req.headers['x-forwarded-for'] || req.socket.remoteAddress}`);
+        return res.status(401).json({ success: false, message: 'รหัสผ่านไม่ถูกต้อง' });
+    }
+
+    logger.info('[VERIFY_EDIT] Edit access granted');
+    return res.status(200).json({ success: true });
+});
 
 // Quick test route to manually trigger the backup for debugging
 app.get('/api/trigger-log-backup', async (req, res) => {
