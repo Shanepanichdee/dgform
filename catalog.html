@@ -318,6 +318,29 @@
                 .replace(/'/g, '&#039;');
         }
 
+        // Security: Server-side edit password verification
+        const VERIFY_EDIT_URL = 'https://dgform.onrender.com/api/verify-edit';
+        async function verifyEditPassword(promptMsg) {
+            const pwd = prompt(promptMsg);
+            if (pwd === null) return false; // User cancelled
+            try {
+                const res = await fetch(VERIFY_EDIT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert('❌ รหัสผ่านไม่ถูกต้อง!');
+                    return false;
+                }
+                return true;
+            } catch (err) {
+                alert('❌ ไม่สามารถตรวจสอบรหัสผ่านได้ กรุณาลองใหม่อีกครั้ง');
+                return false;
+            }
+        }
+
         // Load Config Logic from index.html (Shared Code)
         function loadConfig() {
             const shortcodes = {
@@ -753,12 +776,9 @@
             // Edit button setup (Admin Only)
             const editBtn = document.getElementById('modalEditLink');
             editBtn.style.display = 'inline-block';
-            editBtn.onclick = () => {
-                const pwd = prompt("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
-                if (pwd !== "admin1234") {
-                    if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง!");
-                    return; // Cancel edit
-                }
+            editBtn.onclick = async () => {
+                const ok = await verifyEditPassword("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
+                if (!ok) return;
                 sessionStorage.setItem('editAuthed_' + dataset.datasetId, 'true');
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -1059,17 +1079,14 @@
         }
 
 
-        function editDataset(event, datasetId) {
+        async function editDataset(event, datasetId) {
             if (event) event.stopPropagation();
 
             const dataset = allDatasets.find(d => String(d.datasetId) === String(datasetId));
             if (!dataset) return;
 
-            const pwd = prompt("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
-            if (pwd !== "admin1234") {
-                if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง!");
-                return; // Cancel edit
-            }
+            const ok = await verifyEditPassword("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ในการแก้ไข (Admin Password):");
+            if (!ok) return;
             sessionStorage.setItem('editAuthed_' + dataset.datasetId, 'true');
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -1084,11 +1101,8 @@
         }
 
         async function startMigration() {
-            const pwd = prompt("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ Administrator สำหรับการ Migrate Data:");
-            if (pwd !== "admin1234") {
-                if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง!");
-                return;
-            }
+            const ok = await verifyEditPassword("🔒 กรุณาระบุรหัสผ่านเพื่อสิทธิ์ Administrator สำหรับการ Migrate Data:");
+            if (!ok) return;
 
             if (!allDatasets || allDatasets.length === 0) {
                 alert('ไม่พบข้อมูลที่จะ Migrate กรุณารอให้ระบบโหลดเสร็จสิ้นก่อนครับ');
