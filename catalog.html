@@ -307,6 +307,17 @@
         let searchTimeout = null;
         window.currentScriptUrl = '';
 
+        // Security: HTML escape helper — prevents XSS in innerHTML rendering
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Load Config Logic from index.html (Shared Code)
         function loadConfig() {
             const shortcodes = {
@@ -507,7 +518,7 @@
                 let keywordBadges = '';
                 if (item.keywords && item.keywords.trim() !== '') {
                     const kwArray = String(item.keywords).split(',');
-                    keywordBadges = kwArray.map(kw => `<span class="badge tag-badge shadow-sm">${kw.trim()}</span>`).join('');
+                    keywordBadges = kwArray.map(kw => `<span class="badge tag-badge shadow-sm">${escapeHtml(kw.trim())}</span>`).join('');
                 } else {
                     keywordBadges = `<span class="badge bg-light text-muted border fst-italic">ไม่มีแท็ก (No Tags)</span>`;
                 }
@@ -552,16 +563,16 @@
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
-                                    <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${displayDomain}</span>
+                                    <span class="badge domain-badge fs-6"><i class="bi bi-briefcase me-1"></i> ${escapeHtml(displayDomain)}</span>
                                     <span class="badge bg-light text-dark border ms-1"><i class="bi ${lockIcon} me-1"></i> ${classLabel}</span>
                                 </div>
-                                <button class="btn btn-sm btn-light text-warning border border-warning shadow-sm" style="position: relative; z-index: 2;" onclick="editDataset(event, '${item.datasetId}')" title="แก้ไขข้อมูล (Admin)"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn btn-sm btn-light text-warning border border-warning shadow-sm" style="position: relative; z-index: 2;" onclick="editDataset(event, '${escapeHtml(item.datasetId)}')" title="แก้ไขข้อมูล (Admin)"><i class="bi bi-pencil-square"></i></button>
                             </div>
-                            <h5 class="card-title fw-bold text-primary mb-1 mt-2 line-clamp-2" title="${item.title || 'Untitled'}">${item.title || '<span class="text-danger fst-italic">Untitled Dataset</span>'}</h5>
-                            <p class="text-muted small mb-3"><i class="bi bi-building me-1"></i> ${item.submitterAgency || 'ไม่ระบุหน่วยงาน'}</p>
-                            
+                            <h5 class="card-title fw-bold text-primary mb-1 mt-2 line-clamp-2" title="${escapeHtml(item.title) || 'Untitled'}">${escapeHtml(item.title) || '<span class="text-danger fst-italic">Untitled Dataset</span>'}</h5>
+                            <p class="text-muted small mb-3"><i class="bi bi-building me-1"></i> ${escapeHtml(item.submitterAgency) || 'ไม่ระบุหน่วยงาน'}</p>
+
                             <p class="card-text small text-secondary flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; height: 4.5em;">
-                                ${item.description || '<span class="text-muted fst-italic">...ไม่มีคำอธิบายเพิ่มเติมสำหรับชุดข้อมูลนี้...</span>'}
+                                ${escapeHtml(item.description) || '<span class="text-muted fst-italic">...ไม่มีคำอธิบายเพิ่มเติมสำหรับชุดข้อมูลนี้...</span>'}
                             </p>
                             
                             <div class="mt-3 border-top pt-3">
@@ -571,7 +582,7 @@
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-0 text-end pb-3 px-3">
-                            <button class="btn btn-sm btn-outline-primary fw-bold px-3 w-100 stretched-link" onclick="showDetail('${item.datasetId}')"><i class="bi bi-eye me-1"></i> อ่านรายละเอียดชุดข้อมูล</button>
+                            <button class="btn btn-sm btn-outline-primary fw-bold px-3 w-100 stretched-link" onclick="showDetail('${escapeHtml(item.datasetId)}')"><i class="bi bi-eye me-1"></i> อ่านรายละเอียดชุดข้อมูล</button>
                         </div>
                     </div>
                 `;
@@ -602,7 +613,7 @@
             let keywordBadges = '';
             if (dataset.keywords && dataset.keywords.trim() !== '') {
                 const kwArray = String(dataset.keywords).split(',');
-                keywordBadges = kwArray.map(kw => `<span class="badge tag-badge shadow-sm">${kw.trim()}</span>`).join('');
+                keywordBadges = kwArray.map(kw => `<span class="badge tag-badge shadow-sm">${escapeHtml(kw.trim())}</span>`).join('');
             } else {
                 keywordBadges = `<span class="text-muted fst-italic">ไม่มีแท็ก (No Tags)</span>`;
             }
@@ -646,8 +657,8 @@
 
             modalBody.innerHTML = `
                 <div class="mb-4">
-                    <h4 class="fw-bold text-dark mb-2">${dsClone.title || 'Untitled Dataset'}</h4>
-                    <p class="text-muted"><i class="bi bi-building me-1"></i> หน่วยงานเจ้าของข้อมูล: <strong>${dsClone.submitterAgency || 'ไม่ระบุ'}</strong></p>
+                    <h4 class="fw-bold text-dark mb-2">${escapeHtml(dsClone.title) || 'Untitled Dataset'}</h4>
+                    <p class="text-muted"><i class="bi bi-building me-1"></i> หน่วยงานเจ้าของข้อมูล: <strong>${escapeHtml(dsClone.submitterAgency) || 'ไม่ระบุ'}</strong></p>
                 </div>
 
                 <!-- 🌟 BUSINESS METADATA SECTION -->
@@ -657,19 +668,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">โดเมนข้อมูล (Domain)</h6>
-                            <p class="mb-0 fs-5">${dsClone.domain || '-'}</p>
+                            <p class="mb-0 fs-5">${escapeHtml(dsClone.domain) || '-'}</p>
                         </div>
                         <div class="col-md-6">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">กลุ่มหัวข้อระดับประเทศ</h6>
-                            <p class="mb-0 fs-5">${dsClone.topicCategory || '-'}</p>
+                            <p class="mb-0 fs-5">${escapeHtml(dsClone.topicCategory) || '-'}</p>
                         </div>
                     </div>
 
                     <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">คำอธิบายชุดข้อมูล (Description)</h6>
-                    <p class="mb-3">${cleanDescription || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
+                    <p class="mb-3">${escapeHtml(cleanDescription) || '<span class="text-muted fst-italic">ไม่ระบุคำอธิบาย</span>'}</p>
 
                     <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">วัตถุประสงค์ (Objective)</h6>
-                    <p class="mb-3">${cleanObjective || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
+                    <p class="mb-3">${escapeHtml(cleanObjective) || '<span class="text-muted fst-italic">ไม่ระบุวัตถุประสงค์</span>'}</p>
 
                     <h6 class="fw-bold text-secondary text-uppercase mt-4" style="font-size: 0.85rem;">คำสำคัญ (Keywords)</h6>
                     <div class="mb-3">${keywordBadges}</div>
@@ -687,15 +698,15 @@
                     <div class="row mb-4">
                         <div class="col-md-4 col-6 mb-3">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">ระดับการเผยแพร่</h6>
-                            <div><span class="badge ${String(dataset.classification).toLowerCase().includes('private') ? 'bg-danger' : 'bg-success'}">${dataset.classification || 'Private'}</span></div>
+                            <div><span class="badge ${String(dataset.classification).toLowerCase().includes('private') ? 'bg-danger' : 'bg-success'}">${escapeHtml(dataset.classification) || 'Private'}</span></div>
                         </div>
                         <div class="col-md-4 col-6 mb-3">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">รูปแบบไฟล์ (Format)</h6>
-                            <div><span class="badge border border-secondary text-secondary">${dataset.fileFormat || '-'}</span></div>
+                            <div><span class="badge border border-secondary text-secondary">${escapeHtml(dataset.fileFormat) || '-'}</span></div>
                         </div>
                         <div class="col-md-4 col-6 mb-3">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">ความถี่ที่ปรับปรุง</h6>
-                            <p class="mb-0">${dataset.updateFreqValue || ''} ${dataset.updateFreqUnit || '-'}</p>
+                            <p class="mb-0">${escapeHtml(dataset.updateFreqValue) || ''} ${escapeHtml(dataset.updateFreqUnit) || '-'}</p>
                         </div>
                         <div class="col-md-4 col-6 mb-3">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">วันที่สร้าง</h6>
@@ -707,7 +718,7 @@
                         </div>
                         <div class="col-md-4 col-6 mb-3">
                             <h6 class="fw-bold text-secondary text-uppercase" style="font-size: 0.85rem;">สัญญาอนุญาต (License)</h6>
-                            <p class="mb-0 small">${dataset.license || '-'}</p>
+                            <p class="mb-0 small">${escapeHtml(dataset.license) || '-'}</p>
                         </div>
                     </div>
 
@@ -943,9 +954,9 @@
 
                                     dictHtml += `
                                         <tr>
-                                            <td class="fw-bold font-monospace text-primary text-nowrap">${dict.variable || '-'}${privacyBadge}</td>
-                                            <td class="text-center"><span class="badge bg-secondary font-monospace">${dict.type || '-'}</span></td>
-                                            <td>${dict.description || '-'}</td>
+                                            <td class="fw-bold font-monospace text-primary text-nowrap">${escapeHtml(dict.variable) || '-'}${privacyBadge}</td>
+                                            <td class="text-center"><span class="badge bg-secondary font-monospace">${escapeHtml(dict.type) || '-'}</span></td>
+                                            <td>${escapeHtml(dict.description) || '-'}</td>
                                         </tr>
                                     `;
                                 });
@@ -976,8 +987,8 @@
                                 fullData.glossary.forEach(glos => {
                                     glosHtml += `
                                         <tr>
-                                            <td class="fw-bold text-primary" style="width: 30%;">${glos.term || '-'}</td>
-                                            <td>${glos.definition || '-'}</td>
+                                            <td class="fw-bold text-primary" style="width: 30%;">${escapeHtml(glos.term) || '-'}</td>
+                                            <td>${escapeHtml(glos.definition) || '-'}</td>
                                         </tr>
                                     `;
                                 });

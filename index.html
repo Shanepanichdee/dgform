@@ -877,6 +877,17 @@
     <script>
         let keywords = [];
 
+        // Security: HTML escape helper — prevents XSS in innerHTML rendering
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Save Script URL to localStorage
         // Global variable to hold the background script URL defined by the ?id= parameter
         window.currentScriptUrl = '';
@@ -1138,7 +1149,22 @@
         }
         function removeKeyword(val) { keywords = keywords.filter(k => k !== val); renderKeywords(); }
         function renderKeywords() {
-            document.getElementById('keywordsContainer').innerHTML = keywords.map(k => `<span class="keyword-badge">${k}<span class="remove-tag" onclick="removeKeyword('${k}')">×</span></span>`).join('');
+            // Security: build keyword badges via DOM API (no innerHTML) to prevent XSS
+            const container = document.getElementById('keywordsContainer');
+            container.innerHTML = '';
+            keywords.forEach(k => {
+                const badge = document.createElement('span');
+                badge.className = 'keyword-badge';
+                badge.textContent = k; // safe — textContent never executes HTML
+
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'remove-tag';
+                removeBtn.textContent = '×';
+                removeBtn.addEventListener('click', () => removeKeyword(k)); // safe closure
+
+                badge.appendChild(removeBtn);
+                container.appendChild(badge);
+            });
             document.getElementById('keywords').value = keywords.join(', ');
         }
 
@@ -1175,12 +1201,14 @@
             const container = document.getElementById('metaFieldsContainer');
             const col = document.createElement('div');
             col.className = 'col-md-6 custom-meta-container mt-3';
+            // Security: escape user-typed field name before injecting into innerHTML
+            const safeName = escapeHtml(name);
             col.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label mb-0 fw-bold text-primary">${name}</label>
+                    <label class="form-label mb-0 fw-bold text-primary">${safeName}</label>
                     <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="this.closest('.custom-meta-container').remove()"><i class="bi bi-trash"></i> ลบ</button>
                 </div>
-                <input type="text" class="form-control custom-meta-field border-primary" data-key="${name}">
+                <input type="text" class="form-control custom-meta-field border-primary" data-key="${safeName}">
             `;
             container.appendChild(col);
         }
