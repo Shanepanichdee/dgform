@@ -1131,11 +1131,25 @@
                 try {
                     statusText.innerText = `กำลังส่งข้อมูลชุดที่ ${i + 1} / ${total} : ${dataset.title || 'Untitled'}...`;
 
+                    // ดึงข้อมูลฉบับเต็มจาก Google Apps Script (เพื่อให้ได้ Dictionary และ Glossary มาด้วย)
+                    let fullDataset = { ...dataset };
+                    if (window.currentScriptUrl && dataset.datasetId) {
+                        try {
+                            const fullDataRes = await fetch(`${window.currentScriptUrl}?action=getDataset&datasetId=${dataset.datasetId}`);
+                            const fullDataJson = await fullDataRes.json();
+                            if (fullDataJson.result === 'success' && fullDataJson.data) {
+                                fullDataset = fullDataJson.data;
+                            }
+                        } catch (fetchErr) {
+                            console.warn(`Failed to fetch full dataset details for ${dataset.datasetId}`, fetchErr);
+                        }
+                    }
+
                     const response = await fetch('https://dgform.onrender.com/api/save/mongodb', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        // Send data exactly as formatted from Sheet, adding a flag if needed
-                        body: JSON.stringify({ ...dataset, action: 'update' }) // use update so it skips duplicates if already migrated
+                        // ใช้ action: 'update' เพื่อให้ server (server.js) ตรวจสอบการซ้ำด้วย datasetId ให้โดยอัตโนมัติ หากมีอยู่แล้วจะเซฟทับ (overwrite)
+                        body: JSON.stringify({ ...fullDataset, action: 'update' })
                     });
 
                     if (response.ok) {
