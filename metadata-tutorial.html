@@ -3,7 +3,7 @@
 
 <head>
     <script>
-        if (!localStorage.getItem('isLoggedIn') && !window.location.href.includes('login.html') && !window.location.href.includes('splash.html')) {
+        if (!sessionStorage.getItem('isLoggedIn') && !window.location.href.includes('login.html') && !window.location.href.includes('splash.html')) {
             window.location.href = 'login.html' + window.location.search;
         }
     </script>
@@ -941,8 +941,8 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
-            // อ่านค่ารหัสหน่วยงานแบบซ่อนจาก LocalStorage (ถ้ามี) หรือจาก URL ( fallback สำหรับลิงก์เก่า )
-            const shortcodeId = localStorage.getItem('agencyId') || urlParams.get('id');
+            // อ่านค่ารหัสหน่วยงานแบบซ่อนจาก sessionStorage (ถ้ามี) หรือจาก URL ( fallback สำหรับลิงก์เก่า )
+            const shortcodeId = sessionStorage.getItem('agencyId') || urlParams.get('id');
 
             let config = null;
 
@@ -2048,7 +2048,7 @@
 
         function logout() {
             if (confirm('ต้องการออกจากระบบใช่หรือไม่? (Are you sure you want to logout?)')) {
-                localStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('isLoggedIn');
                 window.location.href = 'splash.html';
             }
         }
