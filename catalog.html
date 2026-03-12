@@ -1135,7 +1135,11 @@
                     let fullDataset = { ...dataset };
                     if (window.currentScriptUrl && dataset.datasetId) {
                         try {
-                            const fullDataRes = await fetch(`${window.currentScriptUrl}?action=getDataset&datasetId=${dataset.datasetId}`);
+                            const urlObj = new URL(window.currentScriptUrl);
+                            urlObj.searchParams.append('action', 'getDataset');
+                            urlObj.searchParams.append('datasetId', dataset.datasetId);
+
+                            const fullDataRes = await fetch(urlObj.toString());
                             const fullDataJson = await fullDataRes.json();
                             if (fullDataJson.result === 'success' && fullDataJson.data) {
                                 fullDataset = fullDataJson.data;
