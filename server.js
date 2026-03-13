@@ -317,11 +317,6 @@ app.post('/api/log', async (req, res) => {
     }
 });
 
-// Health Check
-app.get('/', (req, res) => {
-    res.send('Metadata Repository Backend is Running! 🚀');
-});
-
 // 1. Save to MongoDB (with local file fallback and always logging)
 app.post('/api/save/mongodb', async (req, res) => {
     const data = req.body;
