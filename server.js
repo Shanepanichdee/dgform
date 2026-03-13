@@ -34,7 +34,10 @@ const logger = winston.createLogger({
 const ALLOWED_ORIGINS = [
     'https://shanepanichdee.github.io',
     'http://localhost:3000',
-    'http://localhost:5173' // Vite dev server (dg-change-management)
+    'http://localhost:5173', // Vite dev server
+    'http://127.0.0.1:5500', // VS Code Live Server
+    'http://localhost:5500',
+    'null' // Local file execution
 ];
 app.use(cors({
     origin: function (origin, callback) {
@@ -46,14 +49,21 @@ app.use(cors({
         logger.warn(`[CORS] Blocked request from disallowed origin: ${origin}`);
         return callback(new Error('CORS policy: origin not allowed'), false);
     },
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Quick response for preflight OPTIONS to avoid them hitting custom middleware
+app.options('*', cors());
 
 // ---------------------------------------------------------
 // Security: Manual Security Headers (helmet equivalent)
 // ---------------------------------------------------------
 app.use((req, res, next) => {
+    // skip security headers for OPTIONS preflight
+    if (req.method === 'OPTIONS') {
+        return next();
+    }
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
