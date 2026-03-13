@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
-const { Storage } = require('@google-cloud/storage');
+// GCS removed — @google-cloud/storage uninstalled to reduce build time on Render
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
@@ -214,19 +214,7 @@ if (false /* process.env.DATABASE_URL */) { // 🛑 ปิดการเชื�
     console.log('⚠️ PostgreSQL (Supabase) features are explicitly DISABLED.');
 }
 
-// ---------------------------------------------------------
-// Google Cloud Storage Setup
-// ---------------------------------------------------------
-let storage;
-let bucket;
-
-if (process.env.GCS_KEY_FILE_PATH && process.env.GCS_BUCKET_NAME) {
-    storage = new Storage({ keyFilename: process.env.GCS_KEY_FILE_PATH });
-    bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
-    console.log(`✅ GCS Client initialized for bucket: ${process.env.GCS_BUCKET_NAME}`);
-} else {
-    console.log('⚠️ GCS credentials not found. GCS features will be disabled.');
-}
+// GCS (Google Cloud Storage) disabled — package removed to reduce Render build time
 
 // ---------------------------------------------------------
 // API Endpoints
@@ -345,8 +333,12 @@ app.post('/api/save/mongodb', async (req, res) => {
             }
 
             if (existingRecord) {
-                // Update the existing record with new data (including capturing the datasetId for the future)
-                Object.assign(existingRecord, data);
+                // Use .set() instead of Object.assign so Mongoose can track changes on dynamic fields
+                existingRecord.set(data);
+
+                // Explicitly mark array fields as modified so Mongoose saves them (strict: false quirk)
+                Object.keys(data).forEach(key => existingRecord.markModified(key));
+
                 await existingRecord.save();
 
                 logger.info(`[MONGODB_UPDATE] Updated document ID: ${existingRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
@@ -370,9 +362,8 @@ app.post('/api/save/mongodb', async (req, res) => {
             // If not found at all, it will fall through to insertion below
         }
 
-        // Generate a custom ID or use MongoDB's _id for new inserts (or if update record wasn't found)
-        const newRecord = new Metadata(data);
-        await newRecord.save();
+        // Use Metadata.create() to ensure all dynamic fields (dictionary, glossary) are persisted correctly
+        const newRecord = await Metadata.create(data);
 
         logger.info(`[MONGODB_INSERT] Saved new document ID: ${newRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
 
@@ -399,101 +390,7 @@ app.post('/api/save/mongodb', async (req, res) => {
     }
 });
 
-// 2. Save to Google Cloud Storage (Data Lake)
-app.post('/api/save/gcs', async (req, res) => {
-    if (!bucket) {
-        return res.status(503).json({ error: 'GCS service not available' });
-    }
-    try {
-        const data = req.body;
-        const domain = data.domain || 'unknown_domain';
-        const title = data.title || 'untitled';
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-
-        // Define File Path in Bucket: raw/domain/title_timestamp.json
-        const filename = `raw/${domain}/${title}_${timestamp}.json`;
-        const file = bucket.file(filename);
-
-        // Calculate size for logging
-        const dataString = JSON.stringify(data, null, 2);
-        const sizeBytes = Buffer.byteLength(dataString, 'utf8');
-
-        await file.save(dataString, {
-            contentType: 'application/json',
-            metadata: {
-                cacheControl: 'no-cache',
-            },
-        });
-
-        logger.info(`[GCS] Uploaded file: ${filename} | Size: ${sizeBytes} bytes | Action: ${data.action || 'Unknown'}`);
-        res.status(200).json({ message: 'Saved to GCS Data Lake successfully', path: filename });
-    } catch (error) {
-        logger.error(`[GCS] Upload Error: ${error.message}`);
-        res.status(500).json({ error: 'Failed to save to GCS' });
-    }
-});
-// --- Scheduled Task: Backup Local Logs to GCS Data Lake ---
-// This function runs periodically to upload the app_activity.log file
-// to GCS, then clears the local file to prevent disk exhaustion on Render.
-
-const LOG_FILE_PATH = path.join(__dirname, 'logs', 'app_activity.log');
-
-async function backupLogsToGCS() {
-    if (!bucket) {
-        logger.warn('[LOG_BACKUP] GCS bucket not configured. Skipping log backup.');
-        return;
-    }
-
-    try {
-        // 1. Check if the log file exists and has content
-        if (!fs.existsSync(LOG_FILE_PATH)) {
-            return; // No file yet
-        }
-
-        const stats = await fs.promises.stat(LOG_FILE_PATH);
-        if (stats.size === 0) {
-            return; // File is empty, nothing to upload
-        }
-
-        // 2. Define filename with timestamp
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const gcsFilename = `operation_logs/${timestamp}_app_activity.log`;
-        const file = bucket.file(gcsFilename);
-
-        // 3. Prevent writing to log *during* read by copying to temp first (optional, but safer)
-        // For simplicity and lightweight nature, we'll stream it directly, but we use 
-        // Winston which might be writing at the same time. The risk is extremely low for MVP.
-
-        logger.info(`[LOG_BACKUP] Starting backup of ${stats.size} bytes to ${gcsFilename}...`);
-
-        // 4. Upload to GCS
-        await bucket.upload(LOG_FILE_PATH, {
-            destination: gcsFilename,
-            contentType: 'text/plain',
-            metadata: {
-                cacheControl: 'no-cache',
-            }
-        });
-
-        logger.info(`[LOG_BACKUP] Successfully uploaded logs to GCS: ${gcsFilename}`);
-
-        // 5. Truncate (clear) the local log file
-        // We use truncate instead of deleting to keep the file handle valid for Winston
-        await fs.promises.truncate(LOG_FILE_PATH, 0);
-        logger.info(`[LOG_BACKUP] Cleared local log file.`);
-
-    } catch (error) {
-        // Need to use console.error here to avoid infinite loop of logging errors into the broken log file
-        console.error(`[LOG_BACKUP_ERROR] Failed to backup logs: ${error.message}`);
-    }
-}
-
-// Set up the interval for log backups
-// For production, maybe every 12 hours (12 * 60 * 60 * 1000)
-// For testing/demonstration right now, let's set it to run every 1 minute if called directly,
-// but for normal server operation we will use 1 hour (60 * 60 * 1000)
-const LOG_BACKUP_INTERVAL_MS = process.env.LOG_BACKUP_INTERVAL_MS || 60 * 60 * 1000; // Default 1 hour
-setInterval(backupLogsToGCS, LOG_BACKUP_INTERVAL_MS);
+// GCS /api/save/gcs endpoint removed — @google-cloud/storage uninstalled
 
 // --- Edit Password Verification (Server-side) ---
 app.post('/api/verify-edit', rateLimiter, (req, res) => {
@@ -516,12 +413,7 @@ app.post('/api/verify-edit', rateLimiter, (req, res) => {
     return res.status(200).json({ success: true });
 });
 
-// Quick test route to manually trigger the backup for debugging
-app.get('/api/trigger-log-backup', async (req, res) => {
-    logger.info('[MANUAL_TRIGGER] Log backup requested via API.');
-    await backupLogsToGCS();
-    res.send('Backup process completed. Check server logs.');
-});
+// /api/trigger-log-backup removed — GCS backup no longer available
 
 
 // Start Server
