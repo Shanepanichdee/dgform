@@ -2006,6 +2006,7 @@
                 btn.disabled = false;
 
                 const mongoFailed = mongoResult.status === 'rejected' || (mongoResult.status === 'fulfilled' && !mongoResult.value.ok);
+
                 if (mongoFailed) {
                     // SILENT FALLBACK: We log to console for debugging, but we DO NOT throw an error.
                     // This creates a "Stealth AP" pattern where Google Sheets remains the primary UX source of truth.
