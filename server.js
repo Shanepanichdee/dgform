@@ -136,6 +136,13 @@ setInterval(() => {
 app.use(bodyParser.json({ limit: '50mb' })); // Increase limit for large metadata
 
 // ---------------------------------------------------------
+// Health Check Endpoint (For Render Deployment)
+// ---------------------------------------------------------
+app.get('/', (req, res) => {
+    res.status(200).send('DGForm API Server is running successfully.');
+});
+
+// ---------------------------------------------------------
 // MongoDB Setup
 // ---------------------------------------------------------
 const metadataSchema = new mongoose.Schema({}, { strict: false, timestamps: true });
@@ -430,9 +437,6 @@ app.post('/api/save/gcs', async (req, res) => {
         res.status(500).json({ error: 'Failed to save to GCS' });
     }
 });
-
-const fs = require('fs');
-
 // --- Scheduled Task: Backup Local Logs to GCS Data Lake ---
 // This function runs periodically to upload the app_activity.log file
 // to GCS, then clears the local file to prevent disk exhaustion on Render.
