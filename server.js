@@ -7,10 +7,17 @@ const { Pool } = require('pg');
 const { Storage } = require('@google-cloud/storage');
 const winston = require('winston');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Ensure logs directory exists
+const logDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+}
 
 // Setup Winston Logger
 const logger = winston.createLogger({
