@@ -303,7 +303,7 @@ function doGet(e) {
       for (let i = 1; i < metaData.length; i++) {
         let rowObj = {};
         mHeaders.forEach((h, idx) => rowObj[h] = metaData[i][idx]);
-        if (rowObj.datasetId === reqId) {
+        if (String(rowObj.datasetId) === String(reqId)) {
           dataset = rowObj;
           break;
         }
@@ -323,7 +323,7 @@ function doGet(e) {
           for (let i = 1; i < dData.length; i++) {
             let rowObj = {};
             dHeaders.forEach((h, idx) => rowObj[h] = dData[i][idx]);
-            if (rowObj.datasetId === reqId) {
+            if (String(rowObj.datasetId) === String(reqId)) {
               dataset.dictionary.push(rowObj);
             }
           }
@@ -340,7 +340,7 @@ function doGet(e) {
           for (let i = 1; i < gData.length; i++) {
             let rowObj = {};
             gHeaders.forEach((h, idx) => rowObj[h] = gData[i][idx]);
-            if (rowObj.datasetId === reqId) {
+            if (String(rowObj.datasetId) === String(reqId)) {
               dataset.glossary.push(rowObj);
             }
           }
