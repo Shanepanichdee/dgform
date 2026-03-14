@@ -3,8 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { Pool } = require('pg');
-// GCS removed — @google-cloud/storage uninstalled to reduce build time on Render
+// pg (Supabase) and @google-cloud/storage removed — not needed for current deployment
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs');
@@ -180,41 +179,7 @@ const connectDB = async () => {
 };
 connectDB();
 
-// ---------------------------------------------------------
-// PostgreSQL (Supabase) Setup (DISABLED TEMPORARILY)
-// ---------------------------------------------------------
-let pgPool;
-if (false /* process.env.DATABASE_URL */) { // 🛑 ปิดการเชื่อมต่อ Supabase ไว้ชั่วคราวเพื่อป้องกันระบบรวน 
-    pgPool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
-    });
-
-    const initPostgresDB = async () => {
-        try {
-            await pgPool.query(`
-                CREATE TABLE IF NOT EXISTS dg_metadata (
-                    id SERIAL PRIMARY KEY,
-                    dataset_id VARCHAR(255) UNIQUE,
-                    domain VARCHAR(255),
-                    title VARCHAR(255),
-                    submitter_agency VARCHAR(255),
-                    payload JSONB,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            `);
-            console.log('✅ Connected to PostgreSQL (Supabase)');
-        } catch (err) {
-            console.error('❌ PostgreSQL Connection Error:', err.message);
-        }
-    };
-    initPostgresDB();
-} else {
-    console.log('⚠️ PostgreSQL (Supabase) features are explicitly DISABLED.');
-}
-
-// GCS (Google Cloud Storage) disabled — package removed to reduce Render build time
+// PostgreSQL (Supabase) and GCS removed — MongoDB is the sole database backend
 
 // ---------------------------------------------------------
 // API Endpoints
@@ -305,92 +270,48 @@ app.post('/api/log', async (req, res) => {
     }
 });
 
-// 1. Save to MongoDB (with local file fallback and always logging)
+// 1. Save to MongoDB (with upsert - works for both form submit and migration)
 app.post('/api/save/mongodb', async (req, res) => {
     const data = req.body;
     const isMongoConnected = mongoose.connection.readyState === 1;
 
     try {
-        // ALWAYS log locally
+        // Log metadata only (avoid logging full payload to prevent crashes on large dictionary/glossary data)
         const actionText = data.action === 'update' ? '[LOCAL_UPDATE_LOG]' : '[LOCAL_SAVE_LOG]';
-        logger.info(`${actionText} Domain: ${data.domain || 'Unknown'} | Title: ${data.title || 'Untitled'} | Data: ${JSON.stringify(data)}`);
+        logger.info(`${actionText} Domain: ${data.domain || 'Unknown'} | Title: ${data.title || 'Untitled'} | datasetId: ${data.datasetId || 'none'}`);
 
         if (!isMongoConnected) {
-            // If Mongo is offline, return success early as we already logged locally
             return res.status(200).json({ message: 'Saved to Local Log successfully (MongoDB offline)', id: `local-${Date.now()}` });
         }
 
-        if (data.action === 'update') {
-            // Attempt to find existing record
-            let existingRecord = null;
-            if (data.datasetId) {
-                existingRecord = await Metadata.findOne({ datasetId: data.datasetId });
+        // Build the query filter — prefer datasetId, fallback to title+agency
+        const filter = data.datasetId
+            ? { datasetId: data.datasetId }
+            : { title: data.title, submitterAgency: data.submitterAgency };
+
+        // Strip Mongoose internal fields from payload to avoid conflicts
+        const { _id, __v, ...payload } = data;
+
+        // Atomic upsert: update if found, insert if not — works for both migration and form submit
+        const result = await Metadata.findOneAndUpdate(
+            filter,
+            { $set: payload },
+            {
+                upsert: true,       // create if not found
+                new: true,          // return updated document
+                strict: false,      // allow dynamic fields (dictionary, glossary, etc.)
+                runValidators: false
             }
+        );
 
-            // If we don't have it by datasetId yet (because GAS generated it later), fallback to Title + Agency
-            if (!existingRecord) {
-                existingRecord = await Metadata.findOne({ title: data.title, submitterAgency: data.submitterAgency });
-            }
+        logger.info(`[MONGODB_UPSERT] document ID: ${result._id} | Domain: ${data.domain} | Title: ${data.title}`);
 
-            if (existingRecord) {
-                // Use .set() instead of Object.assign so Mongoose can track changes on dynamic fields
-                existingRecord.set(data);
-
-                // Explicitly mark array fields as modified so Mongoose saves them (strict: false quirk)
-                Object.keys(data).forEach(key => existingRecord.markModified(key));
-
-                await existingRecord.save();
-
-                logger.info(`[MONGODB_UPDATE] Updated document ID: ${existingRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
-
-                // Update in PostgreSQL
-                if (pgPool) {
-                    try {
-                        const datasetId = data.datasetId || existingRecord._id.toString();
-                        await pgPool.query(
-                            `UPDATE dg_metadata SET payload = $1, domain = $2, title = $3, submitter_agency = $4, updated_at = CURRENT_TIMESTAMP WHERE dataset_id = $5 OR (title = $3 AND submitter_agency = $4)`,
-                            [data, data.domain, data.title, data.submitterAgency, datasetId]
-                        );
-                        logger.info(`[POSTGRES_UPDATE] Updated record in Supabase`);
-                    } catch (pgErr) {
-                        logger.error(`[POSTGRES_UPDATE_ERROR] ${pgErr.message}`);
-                    }
-                }
-
-                return res.status(200).json({ message: 'Updated Local Log, MongoDB, and Postgres successfully', id: existingRecord._id });
-            }
-            // If not found at all, it will fall through to insertion below
-        }
-
-        // Use Metadata.create() to ensure all dynamic fields (dictionary, glossary) are persisted correctly
-        const newRecord = await Metadata.create(data);
-
-        logger.info(`[MONGODB_INSERT] Saved new document ID: ${newRecord._id} | Domain: ${data.domain} | Title: ${data.title}`);
-
-        // Insert into PostgreSQL
-        if (pgPool) {
-            try {
-                const datasetId = data.datasetId || newRecord._id.toString();
-                data.datasetId = datasetId; // ensure payload has it
-                await pgPool.query(
-                    `INSERT INTO dg_metadata (dataset_id, domain, title, submitter_agency, payload) VALUES ($1, $2, $3, $4, $5)
-                     ON CONFLICT (dataset_id) DO UPDATE SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP`,
-                    [datasetId, data.domain, data.title, data.submitterAgency, data]
-                );
-                logger.info(`[POSTGRES_INSERT] Saved new record in Supabase`);
-            } catch (pgErr) {
-                logger.error(`[POSTGRES_INSERT_ERROR] ${pgErr.message}`);
-            }
-        }
-
-        res.status(200).json({ message: 'Saved to Local Log, MongoDB, and Postgres successfully', id: newRecord._id });
+        res.status(200).json({ message: 'Saved to MongoDB successfully', id: result._id });
     } catch (error) {
         logger.error(`[SAVE_ERROR] Failed to save/update: ${error.message}`);
-        res.status(500).json({ error: 'Failed to process data in MongoDB' });
+        res.status(500).json({ error: 'Failed to process data in MongoDB', detail: error.message });
     }
 });
-
-// GCS /api/save/gcs endpoint removed — @google-cloud/storage uninstalled
 
 // --- Edit Password Verification (Server-side) ---
 app.post('/api/verify-edit', rateLimiter, (req, res) => {
@@ -413,7 +334,7 @@ app.post('/api/verify-edit', rateLimiter, (req, res) => {
     return res.status(200).json({ success: true });
 });
 
-// /api/trigger-log-backup removed — GCS backup no longer available
+
 
 
 // Start Server

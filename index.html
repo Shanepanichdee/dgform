@@ -847,7 +847,6 @@
                             <select class="form-select" id="saveDestination">
                                 <option value="GoogleSheets" selected>Google Sheets (Metadata Repo)</option>
                                 <option value="MongoDB">MongoDB (JSON Store)</option>
-                                <option value="GCS">Google Cloud Storage (Data Lake)</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -1942,8 +1941,6 @@
                 saveToGoogleSheets(originalText, btn);
             } else if (destination === 'MongoDB') {
                 saveToMongoDB(originalText, btn);
-            } else if (destination === 'GCS') {
-                saveToGCS(originalText, btn);
             }
         }
 
@@ -2151,27 +2148,7 @@
             }
         });
 
-        function saveToGCS(originalText, btn) {
-            const data = getFormData();
-            fetch('https://dgform.onrender.com/api/save/gcs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(response => {
-                if (response.ok) {
-                    alert('อัปโหลดขึ้น GCS สำเร็จ! (Uploaded to Data Lake)');
-                } else {
-                    alert('เกิดข้อผิดพลาด (Error uploading to GCS)');
-                }
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }).catch(error => {
-                console.error(error);
-                alert('ไม่สามารถเชื่อมต่อกับ Server ได้ (Connection Error)');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-        }
+
     </script>
 </body>
 
