@@ -39,6 +39,7 @@ const logger = winston.createLogger({
 // ---------------------------------------------------------
 const ALLOWED_ORIGINS = [
     'https://shanepanichdee.github.io',
+    'https://dgform-masterclass.vercel.app',  // DG Masterclass (Vercel)
     'http://localhost:3000',
     'http://localhost:5173', // Vite dev server
     'http://127.0.0.1:5500', // VS Code Live Server
